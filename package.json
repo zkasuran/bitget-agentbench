@@ -1,0 +1,55 @@
+{
+  "name": "bitget-agentbench",
+  "version": "0.1.0",
+  "description": "Backtest, score and risk-guard Bitget trading agents on real candle data. Emits a reproducible scorecard and trade ledger you can hand a judge.",
+  "type": "module",
+  "license": "MIT",
+  "author": "cryptoasuran",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "agentbench": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "fixtures",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "guard:deps": "node scripts/guard-deps.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "bitget",
+    "trading",
+    "backtest",
+    "agent",
+    "ai",
+    "crypto",
+    "scorecard",
+    "risk"
+  ],
+  "dependencies": {
+    "bitget-core": "^1.1.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^2.0.0"
+  }
+}
