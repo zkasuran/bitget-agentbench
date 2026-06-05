@@ -49,4 +49,5 @@ export { SeededRng } from "./engine/rng.js";
 export { loadFixture, parseRawCandles } from "./sources/fixture-source.js";
 
 // Report
-export { emitReport } from "./report/emit.js";
+export { emitReport, hashDataset } from "./report/emit.js";
+export { renderHtml } from "./report/html.js";

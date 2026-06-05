@@ -6,8 +6,23 @@
  */
 
 import { writeFileSync, mkdirSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { resolve } from "node:path";
-import type { Scorecard, Fill, RunManifest } from "../types.js";
+import type { Scorecard, Fill, Bar } from "../types.js";
+import { renderHtml } from "./html.js";
+
+/**
+ * Deterministic SHA256 of a bar dataset. Hashes the canonical OHLCV tuples so
+ * the manifest can prove which exact candles produced a result. Anyone with the
+ * same dataset gets the same hash, which is what makes a scorecard verifiable.
+ */
+export function hashDataset(bars: readonly Bar[]): string {
+  const h = createHash("sha256");
+  for (const b of bars) {
+    h.update(`${b.time},${b.open},${b.high},${b.low},${b.close},${b.volume}\n`);
+  }
+  return h.digest("hex");
+}
 
 /**
  * Emit the full report suite into `outDir`.
@@ -44,6 +59,13 @@ export function emitReport(
   writeFileSync(
     resolve(outDir, "manifest.json"),
     JSON.stringify(scorecard.manifest, null, 2),
+    "utf8",
+  );
+
+  // scorecard.html — self-contained visual report
+  writeFileSync(
+    resolve(outDir, "scorecard.html"),
+    renderHtml(scorecard, equity, fills),
     "utf8",
   );
 }

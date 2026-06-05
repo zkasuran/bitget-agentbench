@@ -11,7 +11,7 @@
 import { resolve } from "node:path";
 import { loadFixture } from "./sources/fixture-source.js";
 import { runBacktest } from "./engine/backtest.js";
-import { emitReport } from "./report/emit.js";
+import { emitReport, hashDataset } from "./report/emit.js";
 import type { Granularity, StrategyAgent } from "./types.js";
 
 const PKG_VERSION = "0.1.0";
@@ -153,7 +153,7 @@ async function cmdRun(opts: CliArgs): Promise<void> {
       bars: bars.length,
       firstBarTime: bars[0]?.time ?? 0,
       lastBarTime: bars[bars.length - 1]?.time ?? 0,
-      datasetSha256: "fixture",
+      datasetSha256: hashDataset(bars),
     },
   });
 
