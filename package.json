@@ -21,7 +21,9 @@
     "dist",
     "fixtures",
     "examples",
-    "assets",
+    "assets/architecture.png",
+    "assets/logo-wordmark.png",
+    "assets/scorecard.png",
     "README.md"
   ],
   "scripts": {
@@ -30,10 +32,22 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
-    "guard:deps": "node scripts/guard-deps.mjs"
+    "guard:deps": "node scripts/guard-deps.mjs",
+    "prepublishOnly": "npm run guard:deps && npm run typecheck && npm run build && npm test"
   },
   "engines": {
     "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cryptoasuran/bitget-agentbench.git"
+  },
+  "homepage": "https://github.com/cryptoasuran/bitget-agentbench#readme",
+  "bugs": {
+    "url": "https://github.com/cryptoasuran/bitget-agentbench/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "bitget",
