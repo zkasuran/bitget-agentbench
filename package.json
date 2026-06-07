@@ -34,6 +34,8 @@
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
     "guard:deps": "node scripts/guard-deps.mjs",
+    "build:web": "node scripts/build-web.mjs",
+    "smoke:web": "npm run build && npm run build:web && node scripts/smoke-web.mjs",
     "prepublishOnly": "npm run guard:deps && npm run typecheck && npm run build && npm test"
   },
   "engines": {
@@ -71,6 +73,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "esbuild": "^0.27.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^2.0.0"

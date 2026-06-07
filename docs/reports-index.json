@@ -1,0 +1,44 @@
+[
+  {
+    "name": "rsi-meanrev-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "rsi-meanrev",
+    "source": "fixture"
+  },
+  {
+    "name": "rsi-meanrev-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "rsi-meanrev",
+    "source": "fixture"
+  },
+  {
+    "name": "rsi-meanrev-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "rsi-meanrev",
+    "source": "fixture"
+  },
+  {
+    "name": "sma-crossover-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "sma-crossover",
+    "source": "fixture"
+  },
+  {
+    "name": "sma-crossover-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "sma-crossover",
+    "source": "fixture"
+  },
+  {
+    "name": "sma-crossover-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "sma-crossover",
+    "source": "fixture"
+  }
+]
