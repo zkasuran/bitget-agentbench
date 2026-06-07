@@ -49,8 +49,9 @@ await build({
   logLevel: "info",
 });
 
-// 2. Copy the page.
+// 2. Copy the page and its social-share image.
 cpSync(join(root, "web", "index.html"), join(docs, "index.html"));
+cpSync(join(root, "assets", "social-card.png"), join(docs, "social-card.png"));
 
 // 3. Copy committed reports (scorecard.json, equity.csv, trades.jsonl per dir)
 //    and build the index the page lists.

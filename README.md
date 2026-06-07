@@ -42,6 +42,10 @@ AgentBench fills that gap and closes it with verification:
   re-derives the whole claim and prints PASS or FAIL. Re-running a doctored
   scorecard fails, even if the forger re-stamps the hash.
 
+<p align="center">
+  <img src="assets/architecture.png" alt="AgentBench pipeline: your strategy through RiskGuard, the fill simulator on real Bitget candles, the metrics engine, to a scorecard and trade ledger" width="820" />
+</p>
+
 ## Install
 
 ```bash
@@ -67,7 +71,10 @@ The run prints a summary and writes a `report/` folder with `scorecard.json`,
 
 ![AgentBench scorecard](assets/scorecard.png)
 
-Every number is computed from real Bitget candles and reproduces from the seed.
+This is a demo run of a textbook strategy, not a performance claim. The built-ins
+are simple on purpose. The point is that every number is computed from real Bitget
+candles and reproduces byte for byte from the seed, so you can check it rather than
+trust it.
 
 ## Verify: do not trust the scorecard, check it
 
