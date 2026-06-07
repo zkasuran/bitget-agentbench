@@ -318,7 +318,7 @@ your global config or your credentials.
 ```bash
 npm install
 npm run build
-npm test          # 86 tests: simulator, metrics, fixtures, candle source, hash, verify, replay, adapter, cli, mcp
+npm test          # 97 tests: simulator, metrics, fixtures, candle source, hash, verify, replay, adapter, cli, mcp, browser-verify parity
 npm run typecheck
 npm run guard:deps
 ```
@@ -326,7 +326,7 @@ npm run guard:deps
 ## Verification done
 
 Every financial formula is reviewed and the whole suite is verified locally before
-release: 86 passing tests, a clean type-check, end-to-end runs that reproduce
+release: 97 passing tests, a clean type-check, end-to-end runs that reproduce
 byte-identical scorecards from a fixed seed and `agentbench verify` passing on
 every committed report and on a live-fetched run. The fill model, fee rate and
 metric formulas are documented above so they can be checked rather than trusted.
