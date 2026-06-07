@@ -151,15 +151,23 @@
   import { listReports, verifyByName, verifyTampered } from "./verify.bundle.js";
 
   const $ = (id) => document.getElementById(id);
+  const esc = (v) =>
+    String(v ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
   const fmtCheck = (c) => {
     const diff = (c.diffs || [])
       .slice(0, 3)
-      .map((d) => `${d.field}: claimed ${d.claimed}, recomputed ${d.recomputed}`)
+      .map((d) => `${esc(d.field)}: claimed ${esc(d.claimed)}, recomputed ${esc(d.recomputed)}`)
       .join("; ");
+    const status = esc(c.status);
     return `<div class="check">
-      <span class="name">${c.name}</span>
-      <span class="tag ${c.status}">${c.status.toUpperCase()}</span>
-      <span class="detail">${c.detail || ""}${diff ? ` <span class="diff">(${diff})</span>` : ""}</span>
+      <span class="name">${esc(c.name)}</span>
+      <span class="tag ${status}">${status.toUpperCase()}</span>
+      <span class="detail">${esc(c.detail || "")}${diff ? ` <span class="diff">(${diff})</span>` : ""}</span>
     </div>`;
   };
   const render = (result, badgeEl, checksEl) => {
@@ -173,7 +181,7 @@
       const reports = await listReports();
       const sel = $("report");
       sel.innerHTML = reports
-        .map((r) => `<option value="${r.name}">${r.agent} · ${r.symbol} ${r.granularity}</option>`)
+        .map((r) => `<option value="${esc(r.name)}">${esc(r.agent)} · ${esc(r.symbol)} ${esc(r.granularity)}</option>`)
         .join("");
       $("status").textContent = `${reports.length} committed reports. Pick one and verify.`;
     } catch (err) {

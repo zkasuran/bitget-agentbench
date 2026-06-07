@@ -5404,6 +5404,8 @@ async function loadReportIntoVfs(name, scorecardText) {
   if (m && m.source === "fixture") {
     const file = `${m.symbol}-${m.granularity}.json`;
     loadFile(`/fixtures/${file}`, await fetchText(`fixtures/${file}`));
+  } else if (m && m.source === "candles") {
+    loadFile(`${dir}/candles.json`, await fetchText(`reports/${name}/candles.json`));
   }
 }
 async function verifyByName(name) {

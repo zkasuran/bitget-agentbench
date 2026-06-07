@@ -44,13 +44,17 @@ async function loadReportIntoVfs(name: string, scorecardText: string): Promise<v
   // equity + trades drive the ledger check.
   vfs.loadFile(`${dir}/equity.csv`, await fetchText(`reports/${name}/equity.csv`));
   vfs.loadFile(`${dir}/trades.jsonl`, await fetchText(`reports/${name}/trades.jsonl`));
-  // Fixture candles drive dataset + replay. defaultFixtureDir resolves to
-  // /fixtures in the browser, so load the candle file there.
+  // Candles drive dataset + replay. A fixture run loads the named fixture from
+  // /fixtures (defaultFixtureDir resolves there in the browser); a live run keeps
+  // a candles.json snapshot next to its report. Load whichever this report uses
+  // so dataset and replay run, not SKIP.
   const sc = JSON.parse(scorecardText);
   const m = sc.manifest;
   if (m && m.source === "fixture") {
     const file = `${m.symbol}-${m.granularity}.json`;
     vfs.loadFile(`/fixtures/${file}`, await fetchText(`fixtures/${file}`));
+  } else if (m && m.source === "candles") {
+    vfs.loadFile(`${dir}/candles.json`, await fetchText(`reports/${name}/candles.json`));
   }
 }
 

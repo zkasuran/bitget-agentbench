@@ -63,7 +63,7 @@ const neededFixtures = new Set();
 for (const name of reportNames) {
   const dst = join(docs, "reports", name);
   mkdirSync(dst, { recursive: true });
-  for (const f of ["scorecard.json", "equity.csv", "trades.jsonl"]) {
+  for (const f of ["scorecard.json", "equity.csv", "trades.jsonl", "candles.json"]) {
     const src = join(reportsSrc, name, f);
     if (existsSync(src)) cpSync(src, join(dst, f));
   }
