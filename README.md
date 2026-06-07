@@ -71,6 +71,11 @@ Every number is computed from real Bitget candles and reproduces from the seed.
 
 ## Verify: do not trust the scorecard, check it
 
+Prefer to see it before installing anything? The committed reports verify
+**in your browser**, no server and no setup, at
+**https://zkasuran.github.io/bitget-agentbench/**. It runs the real verifier
+client-side and lets you doctor a number and watch the verdict flip to FAIL.
+
 This is the part that matters. `agentbench verify <report-dir | scorecard.json>`
 runs four independent checks and exits non-zero if any fails:
 
