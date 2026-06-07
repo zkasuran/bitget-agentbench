@@ -80,7 +80,7 @@ $ npx agentbench verify ./report
 Verifying ./report/scorecard.json
 Agent:    rsi-meanrev
 
-  [PASS] integrity content hash matches (5a82aabe9bc3f3a8…)
+  [PASS] integrity content hash matches (598ce9fb138bdd08…)
   [PASS] dataset   930 candles re-hash to the claimed dataset SHA256 (3476016e55d868ed…)
   [PASS] ledger    all 12 headline metrics recompute from 29 fills + the equity curve
   [PASS] replay    re-running rsi-meanrev from the manifest reproduces every metric
@@ -227,7 +227,7 @@ A scorecard in a repo should fail the build if its numbers stop reproducing. Dro
 the `verified-by-agentbench` action into a workflow:
 
 ```yaml
-- uses: zkasuran/bitget-agentbench@v0.2.0
+- uses: zkasuran/bitget-agentbench@v0.4.0
   with:
     report: ./report   # a report dir or scorecard.json committed in your repo
 ```
