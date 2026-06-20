@@ -1,0 +1,40 @@
+{
+  "agent": "buy-hold",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9999.4175226748,
+    "totalReturnPct": -0.005824773252006708,
+    "maxDrawdownPct": 0.007997826189108869,
+    "sharpe": -2.2640563848308926,
+    "sortino": -2.113873403999637,
+    "winRatePct": 0,
+    "profitFactor": 0,
+    "totalTrades": 0,
+    "totalFees": 0.0012521252,
+    "turnover": 0.00012521631238594406,
+    "exposurePct": 99.89235737351991,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "604eef551bf3a613bd734bfe6ad0743c694aed1b42985f83b329183034840448",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "ba7043cd114f0412a83315c78d1a7da891b82c31ea66e00a1cf39b32ae308639"
+}

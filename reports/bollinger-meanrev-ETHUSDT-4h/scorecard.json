@@ -1,0 +1,40 @@
+{
+  "agent": "bollinger-meanrev",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9988.65086274785,
+    "totalReturnPct": -0.11349137252149376,
+    "maxDrawdownPct": 0.13088632232669248,
+    "sharpe": -3.123116361001677,
+    "sortino": -1.7473036806105238,
+    "winRatePct": 68.75,
+    "profitFactor": 0.31749148059524135,
+    "totalTrades": 16,
+    "totalFees": 0.74867048215,
+    "turnover": 0.07492509923567994,
+    "exposurePct": 36.38320775026911,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "476be8fd0db936b4af04768aaa9753a2f4c2bf37d08d89a0c25a90b0e5862e5c",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "da3fa1ef550fb1cefcad9a0ab8858b7a73c3cff4e502b03567a0b9d39e849cb0"
+}

@@ -62,9 +62,24 @@ npx agentbench run --strategy sma-crossover --symbol BTCUSDT --tf 4h --seed 42 -
 npx agentbench verify ./report
 ```
 
-Built-in strategies are `sma-crossover` and `rsi-meanrev`. To score your own
-agent, point `--agent` at a file that exports a default `{ onBar(bar, ctx) }`
-(see below).
+Nine built-in strategies ship in the box, spanning the main archetypes so a
+scorecard always has something to sit next to:
+
+| strategy | style |
+| --- | --- |
+| `buy-hold` | baseline: buy once, hold to the end (the comparator to beat) |
+| `sma-crossover` | trend: fast/slow simple moving average cross |
+| `macd-crossover` | trend: MACD signal-line cross (EMA momentum) |
+| `momentum` | trend: go long on a positive trailing return, flatten when it turns negative |
+| `donchian-breakout` | breakout: N-bar high entry, M-bar low exit (turtle) |
+| `atr-channel` | breakout: enter above an ATR-scaled band, exit at the middle (Keltner-style) |
+| `rsi-meanrev` | mean reversion: buy oversold, sell overbought |
+| `bollinger-meanrev` | mean reversion: buy below the lower band, exit at the mean |
+| `vwap-reversion` | mean reversion: buy below VWAP, exit on the revert (the one that uses volume) |
+
+All are long-only spot, matching the engine. List them any time with `agentbench`
+(no args). To score your own agent, point `--agent` at a file that exports a
+default `{ onBar(bar, ctx) }` (see below).
 
 The run prints a summary and writes a `report/` folder with `scorecard.json`,
 `trades.jsonl`, `equity.csv`, `manifest.json` and a self-contained `scorecard.html`:
@@ -93,9 +108,9 @@ Verifying ./report/scorecard.json
 Agent:    rsi-meanrev
 
   [PASS] integrity content hash matches (598ce9fb138bdd08…)
-  [PASS] dataset   930 candles re-hash to the claimed dataset SHA256 (3476016e55d868ed…)
+  [PASS] dataset   930 fixture candles re-hash to the claimed dataset SHA256 (3476016e55d868ed…)
   [PASS] ledger    all 12 headline metrics recompute from 29 fills + the equity curve
-  [PASS] replay    re-running rsi-meanrev from the manifest reproduces every metric
+  [PASS] replay    re-running rsi-meanrev (built-in) from the manifest reproduces every metric
 
 VERIFIED. The numbers were recomputed from the ledger and they match
 ```

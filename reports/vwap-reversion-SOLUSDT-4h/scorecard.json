@@ -1,0 +1,40 @@
+{
+  "agent": "vwap-reversion",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9999.37650386873,
+    "totalReturnPct": -0.0062349613126934855,
+    "maxDrawdownPct": 0.007152616633928891,
+    "sharpe": -3.2213273822259163,
+    "sortino": -2.1054991957412614,
+    "winRatePct": 66.66666666666666,
+    "profitFactor": 0.4971757440396683,
+    "totalTrades": 39,
+    "totalFees": 0.07426922127,
+    "turnover": 0.007427203784828768,
+    "exposurePct": 49.08503767491927,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "604eef551bf3a613bd734bfe6ad0743c694aed1b42985f83b329183034840448",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "854dca1f12aa93aab3177611717ff050db217a03dda8f96184d6d6277c46c737"
+}

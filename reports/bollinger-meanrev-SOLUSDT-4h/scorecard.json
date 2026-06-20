@@ -1,0 +1,40 @@
+{
+  "agent": "bollinger-meanrev",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9999.596435325746,
+    "totalReturnPct": -0.004035646742540849,
+    "maxDrawdownPct": 0.005422868405712506,
+    "sharpe": -2.4105129869588895,
+    "sortino": -1.3434762935201814,
+    "winRatePct": 56.25,
+    "profitFactor": 0.5381146944111809,
+    "totalTrades": 16,
+    "totalFees": 0.029058804250000004,
+    "turnover": 0.002905952320726758,
+    "exposurePct": 36.167922497308936,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "604eef551bf3a613bd734bfe6ad0743c694aed1b42985f83b329183034840448",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "aeee9bf62840cb272527f23bb6130fb0c31e14fb21b8741919a471f56029c4ab"
+}

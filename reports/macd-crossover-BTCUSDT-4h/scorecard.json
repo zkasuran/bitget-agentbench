@@ -1,0 +1,40 @@
+{
+  "agent": "macd-crossover",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9894.76361281825,
+    "totalReturnPct": -1.0523638718175061,
+    "maxDrawdownPct": 1.6854217448195419,
+    "sharpe": -1.138224988946092,
+    "sortino": -0.8455542687672857,
+    "winRatePct": 37.5,
+    "profitFactor": 0.7971694121388258,
+    "totalTrades": 32,
+    "totalFees": 47.74444337174999,
+    "turnover": 4.793011044102569,
+    "exposurePct": 48.38709677419355,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 930,
+    "firstBarTime": 1767240000000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "3476016e55d868ed6c05e442416301be73f6dd8c120b5f9a2d8c41319f3ec6cc",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "bb974895ad07f3e0f8c2e9a32e05041a8c22f073e738fbd52b530961afd7d466"
+}

@@ -1,0 +1,40 @@
+{
+  "agent": "macd-crossover",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9999.52019499894,
+    "totalReturnPct": -0.004798050010595034,
+    "maxDrawdownPct": 0.005714583476214499,
+    "sharpe": -2.983536801106427,
+    "sortino": -2.1200163547646156,
+    "winRatePct": 25.71428571428571,
+    "profitFactor": 0.3966953618326914,
+    "totalTrades": 35,
+    "totalFees": 0.06291364106,
+    "turnover": 0.006291537905480195,
+    "exposurePct": 48.439181916038756,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "604eef551bf3a613bd734bfe6ad0743c694aed1b42985f83b329183034840448",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "e2e0c337e46db09b112399d8af0596a5249852bae5f1a38b54ca35fcca115de2"
+}

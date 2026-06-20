@@ -1,0 +1,40 @@
+{
+  "agent": "atr-channel",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9999.557191930233,
+    "totalReturnPct": -0.004428080697671249,
+    "maxDrawdownPct": 0.005562002079286357,
+    "sharpe": -3.4785798238390564,
+    "sortino": -2.001734867786551,
+    "winRatePct": 13.636363636363635,
+    "profitFactor": 0.18824994946774215,
+    "totalTrades": 22,
+    "totalFees": 0.041007339770000005,
+    "turnover": 0.004100828709391373,
+    "exposurePct": 25.941872981700755,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "604eef551bf3a613bd734bfe6ad0743c694aed1b42985f83b329183034840448",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "81ca2bbec235bc075299ff4b8b79570d09ba64f90429062b1ea3f200bff82db6"
+}

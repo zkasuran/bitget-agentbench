@@ -1,0 +1,40 @@
+{
+  "agent": "momentum",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9991.264509615825,
+    "totalReturnPct": -0.08735490384175137,
+    "maxDrawdownPct": 0.10594717795991392,
+    "sharpe": -2.3625664010716427,
+    "sortino": -1.716840913227997,
+    "winRatePct": 27.659574468085108,
+    "profitFactor": 0.5526813394089352,
+    "totalTrades": 47,
+    "totalFees": 2.1761731341700004,
+    "turnover": 0.21770519063962554,
+    "exposurePct": 42.94940796555436,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "476be8fd0db936b4af04768aaa9753a2f4c2bf37d08d89a0c25a90b0e5862e5c",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "3ddf41836a9d01bb22b97c7ae5ac6cb92da0faa8bbd7788c0474278dfae580ad"
+}

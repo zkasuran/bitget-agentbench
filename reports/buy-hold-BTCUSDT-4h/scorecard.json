@@ -1,0 +1,40 @@
+{
+  "agent": "buy-hold",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9749.8648305562,
+    "totalReturnPct": -2.501351694437999,
+    "maxDrawdownPct": 3.4377039430659453,
+    "sharpe": -1.7886772479376802,
+    "sortino": -1.700024461525136,
+    "winRatePct": 0,
+    "profitFactor": 0,
+    "totalTrades": 0,
+    "totalFees": 0.8765256438,
+    "turnover": 0.08868743467682845,
+    "exposurePct": 99.89247311827957,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 930,
+    "firstBarTime": 1767240000000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "3476016e55d868ed6c05e442416301be73f6dd8c120b5f9a2d8c41319f3ec6cc",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "e64287fe57f3289bd433c31e90eeac4e5689af8de26e9b6307df8d542abdf0e8"
+}

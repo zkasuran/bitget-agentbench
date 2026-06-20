@@ -1,0 +1,40 @@
+{
+  "agent": "vwap-reversion",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9987.470521902753,
+    "totalReturnPct": -0.12529478097247193,
+    "maxDrawdownPct": 0.13727585493641226,
+    "sharpe": -3.067942288970285,
+    "sortino": -2.0972189891685242,
+    "winRatePct": 63.63636363636363,
+    "profitFactor": 0.4817101446719295,
+    "totalTrades": 33,
+    "totalFees": 1.5027076172399998,
+    "turnover": 0.1503818747715821,
+    "exposurePct": 52.42195909580194,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "476be8fd0db936b4af04768aaa9753a2f4c2bf37d08d89a0c25a90b0e5862e5c",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "eb0f98674eff9777588f61c2d02728fef851e0e6c8b014bdfb4626fc17dd0238"
+}
