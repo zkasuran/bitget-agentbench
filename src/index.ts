@@ -65,6 +65,13 @@ export { loadAgentFromFile } from "./agent-loader.js";
 // Built-in example strategies (reusable)
 export { default as smaCrossover } from "./strategies/sma-crossover.js";
 export { default as rsiMeanrev } from "./strategies/rsi-meanrev.js";
+export { default as buyHold } from "./strategies/buy-hold.js";
+export { default as donchianBreakout } from "./strategies/donchian-breakout.js";
+export { default as bollingerMeanrev } from "./strategies/bollinger-meanrev.js";
+export { default as macdCrossover } from "./strategies/macd-crossover.js";
+export { default as vwapReversion } from "./strategies/vwap-reversion.js";
+export { default as atrChannel } from "./strategies/atr-channel.js";
+export { default as momentum } from "./strategies/momentum.js";
 export { STRATEGIES, listStrategies } from "./strategies/registry.js";
 
 // Adapters

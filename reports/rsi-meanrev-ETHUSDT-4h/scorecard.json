@@ -16,7 +16,7 @@
     "violations": 0
   },
   "manifest": {
-    "agentbenchVersion": "0.4.0",
+    "agentbenchVersion": "0.5.0",
     "symbol": "ETHUSDT",
     "granularity": "4h",
     "source": "fixture",
@@ -36,5 +36,5 @@
       "maxPositionSize": 1
     }
   },
-  "scorecardSha256": "5ba63ba35959ac6bd547534143bfe4d4cd857a15166952ece79916215b494868"
+  "scorecardSha256": "fe494d4f5dbbc12ec0d8049e3bb4f6abbb975efdb3cb1ba1e4f4b784a2174c24"
 }

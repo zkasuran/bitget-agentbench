@@ -161,8 +161,19 @@ describe("agentbench verify", () => {
 describe("help", () => {
   it("lists the built-in strategies and the real version", () => {
     const text = helpText();
-    expect(text).toContain("sma-crossover");
-    expect(text).toContain("rsi-meanrev");
+    for (const name of [
+      "sma-crossover",
+      "rsi-meanrev",
+      "buy-hold",
+      "donchian-breakout",
+      "bollinger-meanrev",
+      "macd-crossover",
+      "vwap-reversion",
+      "atr-channel",
+      "momentum",
+    ]) {
+      expect(text).toContain(name);
+    }
     expect(text).toContain(VERSION);
   });
 

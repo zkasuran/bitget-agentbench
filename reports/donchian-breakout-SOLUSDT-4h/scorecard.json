@@ -1,0 +1,40 @@
+{
+  "agent": "donchian-breakout",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9999.74526158827,
+    "totalReturnPct": -0.0025473841172970425,
+    "maxDrawdownPct": 0.0037551534554271975,
+    "sharpe": -1.9387898188123223,
+    "sortino": -1.1789313137111626,
+    "winRatePct": 22.22222222222222,
+    "profitFactor": 0.30877959121176163,
+    "totalTrades": 18,
+    "totalFees": 0.03403492173000001,
+    "turnover": 0.003403544174721282,
+    "exposurePct": 29.60172228202368,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "604eef551bf3a613bd734bfe6ad0743c694aed1b42985f83b329183034840448",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "b7e68e71ee541282db1bbefe3eadc999aa82f4fdc72e755e1517fee23eb6d869"
+}

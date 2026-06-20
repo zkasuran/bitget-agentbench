@@ -1,0 +1,40 @@
+{
+  "agent": "momentum",
+  "metrics": {
+    "startingEquity": 10000,
+    "finalEquity": 9999.54322497393,
+    "totalReturnPct": -0.004567750260703178,
+    "maxDrawdownPct": 0.0053570161418316845,
+    "sharpe": -2.67497529851351,
+    "sortino": -1.9227330573266181,
+    "winRatePct": 27.27272727272727,
+    "profitFactor": 0.3611285316548464,
+    "totalTrades": 44,
+    "totalFees": 0.08734093606999999,
+    "turnover": 0.008734311093149899,
+    "exposurePct": 44.02583423035522,
+    "violations": 0
+  },
+  "manifest": {
+    "agentbenchVersion": "0.5.0",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "source": "fixture",
+    "bars": 929,
+    "firstBarTime": 1767254400000,
+    "lastBarTime": 1780617600000,
+    "datasetSha256": "604eef551bf3a613bd734bfe6ad0743c694aed1b42985f83b329183034840448",
+    "schemaVersion": 1,
+    "engine": {
+      "startingEquity": 10000,
+      "feeBps": 10,
+      "slippageBps": 1,
+      "seed": 42
+    },
+    "risk": {
+      "maxDrawdownKill": 0.3,
+      "maxPositionSize": 1
+    }
+  },
+  "scorecardSha256": "714522beeca8ff3e802fd10914a516427d462d4dc49bb9faa3e1720bdf59be8a"
+}
