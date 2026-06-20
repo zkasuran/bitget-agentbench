@@ -254,7 +254,7 @@ A scorecard in a repo should fail the build if its numbers stop reproducing. Dro
 the `verified-by-agentbench` action into a workflow:
 
 ```yaml
-- uses: zkasuran/bitget-agentbench@v0.4.0
+- uses: zkasuran/bitget-agentbench@v0.5.0
   with:
     report: ./report   # a report dir or scorecard.json committed in your repo
 ```
@@ -340,7 +340,7 @@ your global config or your credentials.
 ```bash
 npm install
 npm run build
-npm test          # 97 tests: simulator, metrics, fixtures, candle source, hash, verify, replay, adapter, cli, mcp, browser-verify parity
+npm test          # 149 tests: simulator, metrics, fixtures, candle source, hash, verify, replay, adapter, cli, mcp, strategies, browser-verify parity
 npm run typecheck
 npm run guard:deps
 ```
@@ -348,7 +348,7 @@ npm run guard:deps
 ## Verification done
 
 Every financial formula is reviewed and the whole suite is verified locally before
-release: 97 passing tests, a clean type-check, end-to-end runs that reproduce
+release: 149 passing tests, a clean type-check, end-to-end runs that reproduce
 byte-identical scorecards from a fixed seed and `agentbench verify` passing on
 every committed report and on a live-fetched run. The fill model, fee rate and
 metric formulas are documented above so they can be checked rather than trusted.
