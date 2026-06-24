@@ -49,3 +49,9 @@ jobs:
             git status --porcelain -- docs/
             exit 1
           fi
+      - name: Web verifier smoke
+        # The page bundles the real engine for the browser: it verifies committed
+        # reports, catches a tampered one, runs a strategy in-browser and verifies
+        # an uploaded report. Assert all of that headless, and that an in-browser
+        # run reproduces the CLI scorecard byte for byte (no network: fixture run).
+        run: node scripts/smoke-web.mjs

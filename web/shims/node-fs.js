@@ -79,11 +79,21 @@ export function readdirSync(path) {
   return [...names];
 }
 
-// Writers are unused by verify, present so the bundle never crashes if touched.
-export function writeFileSync() {
-  throw new Error("node-fs shim is read-only in the browser");
+// Writers: verify never writes, but a live in-browser run does. emitReport writes
+// the scorecard, ledger and equity here, then verifyReport reads them back from
+// this same map. Same store, same paths, no disk. Reuse loadFile's dir-tracking.
+export function writeFileSync(path, contents) {
+  loadFile(path, typeof contents === "string" ? contents : String(contents));
 }
-export function mkdirSync() {}
+export function mkdirSync(path) {
+  if (path == null) return;
+  let dir = norm(path);
+  while (dir.length > 0) {
+    dirs.add(dir);
+    dir = dir.slice(0, dir.lastIndexOf("/"));
+  }
+  dirs.add("/");
+}
 export function realpathSync(p) {
   return norm(p);
 }

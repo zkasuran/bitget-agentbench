@@ -11,10 +11,22 @@
 
 import { verifyReport } from "../src/verify.js";
 import type { VerifyResult } from "../src/verify.js";
+import { runBacktest } from "../src/engine/backtest.js";
+import { emitReport, hashDataset } from "../src/report/emit.js";
+import { fetchRawCandles } from "../src/sources/candle-source.js";
+import { loadFixture, parseRawCandles } from "../src/sources/fixture-source.js";
+import { STRATEGIES, listStrategies } from "../src/strategies/registry.js";
+import type { Bar, Granularity } from "../src/types.js";
 // The fs shim instance the bundle aliases node:fs to. Importing it here gives us
 // the same module instance the verifier reads from.
 // @ts-expect-error - plain JS shim, no types
 import * as vfs from "./shims/node-fs.js";
+
+// Injected by build-web.mjs from package.json. version.ts reads package.json via
+// readFileSync at module load, which the browser cannot do, so the build stamps
+// the version in here as a constant. Same single source of truth, no fs read.
+declare const __AGENTBENCH_VERSION__: string;
+const VERSION = __AGENTBENCH_VERSION__;
 
 const BASE = new URL(".", import.meta.url).href; // directory this bundle is served from
 
@@ -144,4 +156,162 @@ function resolvePath(
   }
   const key = parts[parts.length - 1];
   return { container: node, key, original: node[key] };
+}
+
+// ---------------------------------------------------------------------------
+// Bring-your-own: run a backtest in the browser, then verify it. Same code path
+// as the CLI's `run` then `verify`, just over the in-memory fs.
+// ---------------------------------------------------------------------------
+
+/** The built-in strategy names, for the page's dropdown. */
+export function strategyNames(): string[] {
+  return listStrategies();
+}
+
+export interface RunSpec {
+  strategy: string;
+  symbol: string;
+  granularity: Granularity;
+  source: "fixture" | "live";
+  /** Live only: how many candles to fetch (default 200, capped at 1000). */
+  limit?: number;
+  /** RNG seed, so a run is reproducible (default 1, matching the CLI). */
+  seed?: number;
+}
+
+/**
+ * Run a built-in strategy and verify the result, entirely in the browser. This
+ * mirrors the CLI's cmdRun: load candles (a committed fixture, or fresh live
+ * candles from Bitget's keyless public endpoint), runBacktest, emitReport into
+ * the in-memory fs, snapshot the live candles next to it, then verifyReport over
+ * what was just written. The verdict and numbers are the CLI's, recomputed here.
+ */
+export async function runStrategy(
+  spec: RunSpec,
+): Promise<VerifyResult & { summary: ReportSummary }> {
+  const agent = STRATEGIES[spec.strategy];
+  if (!agent) throw new Error(`unknown strategy "${spec.strategy}"`);
+
+  const seed = spec.seed ?? 1;
+  // Fixed output dir: the report contents do not depend on the path, and a
+  // constant keeps a free-text symbol from steering files to an odd vfs path.
+  const out = `/run/report`;
+  const fixtureFile = `/fixtures/${spec.symbol}-${spec.granularity}.json`;
+
+  // Fetch everything BEFORE touching the vfs, so a failed live fetch (CORS, HTTP
+  // error, empty data) leaves the previous run's state alone rather than wiping
+  // it and stranding a stale result card.
+  let rawSnapshot: Awaited<ReturnType<typeof fetchRawCandles>> | null = null;
+  let fixtureText: string | null = null;
+  if (spec.source === "live") {
+    const limit = spec.limit ?? 200;
+    // Keyless public endpoint, served with Access-Control-Allow-Origin: *, so
+    // the browser can fetch it directly. No key, no account, no real money.
+    rawSnapshot = await fetchRawCandles({ symbol: spec.symbol, granularity: spec.granularity, limit });
+  } else {
+    // loadFixture reads the fixture file via the fs shim, so fetch the committed
+    // fixture first (the same file the verifier uses).
+    fixtureText = await fetchText(`fixtures/${spec.symbol}-${spec.granularity}.json`);
+  }
+
+  // Fetch succeeded: now it is safe to claim the vfs and build the run.
+  vfs.reset();
+  let bars: Bar[];
+  let manifestSource: "fixture" | "candles";
+  if (rawSnapshot) {
+    bars = parseRawCandles(rawSnapshot.data as Parameters<typeof parseRawCandles>[0]);
+    manifestSource = "candles";
+  } else {
+    vfs.loadFile(fixtureFile, fixtureText!);
+    bars = loadFixture(spec.symbol, spec.granularity);
+    manifestSource = "fixture";
+  }
+  if (bars.length === 0) throw new Error("no candles to run on");
+
+  const config = { startingEquity: 10_000, feeBps: 10, slippageBps: 1, seed };
+  const risk = { maxDrawdownKill: 0.3, maxPositionSize: 1.0 };
+  const { scorecard, fills, equityCurve } = await runBacktest({
+    agent,
+    bars,
+    config,
+    risk,
+    manifest: {
+      agentbenchVersion: VERSION,
+      symbol: spec.symbol,
+      granularity: spec.granularity,
+      source: manifestSource,
+      bars: bars.length,
+      firstBarTime: bars[0]?.time ?? 0,
+      lastBarTime: bars[bars.length - 1]?.time ?? 0,
+      datasetSha256: hashDataset(bars),
+    },
+  });
+
+  emitReport(scorecard, fills, equityCurve, out);
+  // A live run snapshots its candles next to the report so the replay check has
+  // the exact data, exactly as the CLI does.
+  if (rawSnapshot) vfs.writeFileSync(`${out}/candles.json`, JSON.stringify(rawSnapshot));
+
+  const result = await verifyReport(out);
+  return { ...result, summary: summarize(vfs.readFileSync(`${out}/scorecard.json`)) };
+}
+
+/**
+ * Verify a report the user produced with the CLI, by uploading its files. The
+ * files never leave the browser: they are read locally, loaded into the in-memory
+ * fs and checked by the same verifyReport. A fixture-sourced report needs its
+ * fixture, which the page already ships, so pull it if the upload omitted it.
+ */
+export async function verifyUploaded(
+  files: Record<string, string>,
+): Promise<VerifyResult & { summary: ReportSummary }> {
+  // Files arrive keyed by their relative path. A folder pick can sweep in more
+  // than one report (e.g. the whole reports/ tree), so group by parent directory
+  // and verify exactly one report, never a mix of files from sibling dirs.
+  const parentOf = (k: string): string => {
+    const i = k.lastIndexOf("/");
+    return i === -1 ? "" : k.slice(0, i);
+  };
+  const scorecardDirs = Object.keys(files)
+    .filter((k) => k.split("/").pop() === "scorecard.json")
+    .map(parentOf);
+  if (scorecardDirs.length === 0) throw new Error("no scorecard.json in the uploaded files");
+  if (new Set(scorecardDirs).size > 1) {
+    throw new Error(
+      `found ${scorecardDirs.length} reports in that selection; pick one report folder at a time`,
+    );
+  }
+  const reportDir = scorecardDirs[0]!;
+
+  vfs.reset();
+  const dir = "/upload";
+  // Load only the files that sit in the same directory as the chosen scorecard,
+  // so an equity.csv or candles.json from a different report cannot leak in.
+  const REPORT_FILES = ["scorecard.json", "equity.csv", "trades.jsonl", "candles.json"];
+  let scorecardText = "";
+  for (const [k, v] of Object.entries(files)) {
+    if (parentOf(k) !== reportDir) continue;
+    const base = k.split("/").pop()!;
+    if (REPORT_FILES.includes(base)) {
+      vfs.loadFile(`${dir}/${base}`, v);
+      if (base === "scorecard.json") scorecardText = v;
+    } else if (base.startsWith("agent.snapshot.")) {
+      // accepted, though replaying it stays opt-in (verify never runs it here)
+      vfs.loadFile(`${dir}/${base}`, v);
+    }
+  }
+
+  // A fixture run reads /fixtures/<symbol>-<gran>.json. If the upload did not
+  // bring candles.json (a live snapshot), it is a fixture run: fetch the fixture
+  // the page ships so dataset and replay run instead of skipping.
+  const m = (JSON.parse(scorecardText) as { manifest?: { source?: string; symbol?: string; granularity?: string } }).manifest;
+  if (m && m.source === "fixture") {
+    const file = `${m.symbol}-${m.granularity}.json`;
+    if (!vfs.existsSync(`/fixtures/${file}`)) {
+      vfs.loadFile(`/fixtures/${file}`, await fetchText(`fixtures/${file}`));
+    }
+  }
+
+  const result = await verifyReport(dir);
+  return { ...result, summary: summarize(scorecardText) };
 }

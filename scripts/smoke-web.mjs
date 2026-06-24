@@ -5,10 +5,10 @@
  * copy fails on ledger + replay, and the verdict matches the CLI's verifyReport.
  */
 
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { verifyReport } from "../dist/index.js";
+import { verifyReport, runBacktest, loadFixture, hashDataset, STRATEGIES, VERSION } from "../dist/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const docs = join(root, "docs");
@@ -74,8 +74,87 @@ console.log(
 );
 if (!tamperCaught) failures++;
 
+// Bring-your-own A: a fixture run in the browser must recompute the exact same
+// scorecard as the CLI's runBacktest, and verify 4/4.
+{
+  const bars = loadFixture("BTCUSDT", "4h");
+  const cli = await runBacktest({
+    agent: STRATEGIES["momentum"],
+    bars,
+    config: { startingEquity: 10_000, feeBps: 10, slippageBps: 1, seed: 1 },
+    risk: { maxDrawdownKill: 0.3, maxPositionSize: 1.0 },
+    manifest: {
+      agentbenchVersion: VERSION,
+      symbol: "BTCUSDT",
+      granularity: "4h",
+      source: "fixture",
+      bars: bars.length,
+      firstBarTime: bars[0].time,
+      lastBarTime: bars[bars.length - 1].time,
+      datasetSha256: hashDataset(bars),
+    },
+  });
+  const web_run = await web.runStrategy({
+    strategy: "momentum",
+    symbol: "BTCUSDT",
+    granularity: "4h",
+    source: "fixture",
+    seed: 1,
+  });
+  const allPass = web_run.pass && web_run.checks.every((c) => c.status === "pass");
+  const sameSharpe = web_run.summary.sharpe === cli.scorecard.metrics.sharpe;
+  const ok = allPass && sameSharpe;
+  console.log(
+    `  ${ok ? "OK " : "XX "} runStrategy fixture momentum-BTCUSDT-4h: verify=${web_run.pass ? "PASS" : "FAIL"} ` +
+      `sharpe web=${web_run.summary.sharpe} cli=${cli.scorecard.metrics.sharpe} match=${sameSharpe}`,
+  );
+  if (!ok) failures++;
+}
+
+// Bring-your-own B: uploading a committed report's files must verify, matching
+// the CLI over the same files on disk.
+{
+  const name = reports[0].name;
+  const dir = join(docs, "reports", name);
+  const files = {};
+  for (const f of await readdir(dir)) files[f] = await readFile(join(dir, f), "utf8");
+  const up = await web.verifyUploaded(files);
+  const cli = await verifyReport(join(root, "reports", name));
+  const same =
+    up.pass === cli.pass &&
+    JSON.stringify(up.checks.map((c) => [c.name, c.status])) ===
+      JSON.stringify(cli.checks.map((c) => [c.name, c.status]));
+  const ok = up.pass && same;
+  console.log(
+    `  ${ok ? "OK " : "XX "} verifyUploaded ${name}: web=${up.pass ? "PASS" : "FAIL"} cli=${cli.pass ? "PASS" : "FAIL"} match=${same}`,
+  );
+  if (!ok) failures++;
+}
+
+// Bring-your-own B (guard): a selection holding two different report folders is
+// rejected, not silently mixed into one confusing FAIL.
+{
+  const [a, b] = [reports[0].name, reports[1].name];
+  const files = {};
+  for (const rn of [a, b]) {
+    const d = join(docs, "reports", rn);
+    for (const f of await readdir(d)) files[`${rn}/${f}`] = await readFile(join(d, f), "utf8");
+  }
+  let rejected = false;
+  try {
+    await web.verifyUploaded(files);
+  } catch {
+    rejected = true;
+  }
+  console.log(`  ${rejected ? "OK " : "XX "} verifyUploaded rejects a multi-report selection (${a} + ${b})`);
+  if (!rejected) failures++;
+}
+
 if (failures > 0) {
   console.error(`\nWEB SMOKE FAILED: ${failures} problem(s)`);
   process.exit(1);
 }
-console.log("\nweb smoke: all reports verify in-browser and match the CLI, tamper is caught");
+console.log(
+  "\nweb smoke: all reports verify in-browser and match the CLI, tamper is caught, " +
+    "a browser run reproduces the CLI scorecard and an uploaded report verifies",
+);

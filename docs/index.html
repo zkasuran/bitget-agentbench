@@ -153,6 +153,95 @@
 
   <hr class="hr" />
 
+  <h2>Run your own</h2>
+  <p class="demo-note">
+    Pick a strategy and a market, then run it here. With <b>live</b> it fetches
+    fresh candles from Bitget's public keyless endpoint in your browser (no key,
+    no account, no real money), backtests, scores and verifies, all on your
+    machine. With <b>fixture</b> it uses the committed candles, fully offline.
+  </p>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="run-strategy">Strategy</label>
+        <select id="run-strategy"></select>
+      </div>
+      <div style="flex:0 0 120px;min-width:120px;">
+        <label for="run-symbol">Symbol</label>
+        <input id="run-symbol" class="mono" value="BTCUSDT" />
+      </div>
+      <div style="flex:0 0 100px;min-width:100px;">
+        <label for="run-tf">Timeframe</label>
+        <select id="run-tf">
+          <option>1h</option><option selected>4h</option><option>1day</option>
+        </select>
+      </div>
+      <div style="flex:0 0 120px;min-width:120px;">
+        <label for="run-source">Candles</label>
+        <select id="run-source">
+          <option value="live">live (Bitget)</option>
+          <option value="fixture">fixture (offline)</option>
+        </select>
+      </div>
+      <div style="flex:0 0 90px;min-width:90px;">
+        <label for="run-limit">Live limit</label>
+        <input id="run-limit" class="mono" value="200" />
+      </div>
+      <div style="flex:0 0 auto;">
+        <button id="run" class="primary">Run and verify</button>
+      </div>
+    </div>
+    <div id="run-status" class="muted" style="margin-top:12px;">
+      Live fetch needs network. Fixture markets: BTCUSDT, ETHUSDT, SOLUSDT at 4h.
+    </div>
+  </div>
+
+  <div class="card" id="run-result" style="display:none;">
+    <div class="verdict">
+      <span id="run-badge" class="badge run">…</span>
+      <span id="run-agent" class="mono" style="font-size:15px;color:var(--dim);"></span>
+    </div>
+    <div id="run-metrics" class="metrics"></div>
+    <div id="run-checks"></div>
+  </div>
+
+  <hr class="hr" />
+
+  <h2>Verify your own report</h2>
+  <p class="demo-note">
+    Ran <code>agentbench run --out ./report</code> on your own machine? Drop the
+    report folder here (or its files: scorecard.json, equity.csv, trades.jsonl
+    and, for a live run, candles.json). They never leave your browser. The same
+    verifier recomputes the numbers and tells you if they hold.
+  </p>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="upload">Report folder or files</label>
+        <input id="upload" type="file" multiple webkitdirectory />
+      </div>
+      <div style="flex:0 0 auto;">
+        <button id="upload-files-btn" class="primary">Verify upload</button>
+      </div>
+    </div>
+    <div class="muted" style="margin-top:8px;">
+      Folder picker not cooperating? <button id="pick-files" style="padding:4px 9px;">pick files instead</button>
+      <input id="upload-files" type="file" multiple style="display:none;" />
+    </div>
+    <div id="upload-status" class="muted" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card" id="upload-result" style="display:none;">
+    <div class="verdict">
+      <span id="up-badge" class="badge run">…</span>
+      <span id="up-agent" class="mono" style="font-size:15px;color:var(--dim);"></span>
+    </div>
+    <div id="up-metrics" class="metrics"></div>
+    <div id="up-checks"></div>
+  </div>
+
+  <hr class="hr" />
+
   <h2>See it catch a lie</h2>
   <p class="demo-note">
     Edit one number in the scorecard and verify the doctored copy. The file on
@@ -191,16 +280,21 @@
   </div>
 
   <p class="foot">
-    Runs the real <code>verifyReport</code> from
+    Runs the real <code>runBacktest</code> and <code>verifyReport</code> from
     <a href="https://github.com/zkasuran/bitget-agentbench">bitget-agentbench</a>,
-    bundled for the browser. The SHA-256 used here is proven byte-identical to the
-    CLI's by a test in the repo, so a PASS here means a PASS there. Built with AI
-    assistance (Claude), disclosed in the repo.
+    bundled for the browser. Same engine and same SHA-256 as the CLI (proven
+    byte-identical by a test in the repo), so a result here matches a result
+    there. Live candles come from Bitget's public keyless endpoint. Nothing you
+    run or upload leaves your browser. Built with AI assistance (Claude),
+    disclosed in the repo.
   </p>
 </div>
 
 <script type="module">
-  import { listReports, verifyByName, verifyTampered } from "./verify.bundle.js";
+  import {
+    listReports, verifyByName, verifyTampered,
+    runStrategy, verifyUploaded, strategyNames,
+  } from "./verify.bundle.js";
 
   const $ = (id) => document.getElementById(id);
   const esc = (v) =>
@@ -256,6 +350,14 @@
     } catch (err) {
       $("status").textContent = "Could not load the report index: " + err;
     }
+    // Populate the "run your own" strategy dropdown from the bundle.
+    try {
+      $("run-strategy").innerHTML = strategyNames()
+        .map((n) => `<option value="${esc(n)}">${esc(n)}</option>`)
+        .join("");
+    } catch (err) {
+      $("run-status").textContent = "Could not load strategies: " + err;
+    }
   }
 
   $("verify").addEventListener("click", async () => {
@@ -291,6 +393,84 @@
       $("tamper-status").textContent = "Error: " + err;
     }
   });
+
+  $("run").addEventListener("click", async () => {
+    const spec = {
+      strategy: $("run-strategy").value,
+      symbol: $("run-symbol").value.trim().toUpperCase(),
+      granularity: $("run-tf").value,
+      source: $("run-source").value,
+      limit: Math.max(1, Math.min(1000, Number($("run-limit").value) || 200)),
+      seed: 1,
+    };
+    $("run-status").textContent =
+      spec.source === "live"
+        ? `Fetching ${spec.limit} live candles and running ${spec.strategy}…`
+        : `Running ${spec.strategy} on the ${spec.symbol} ${spec.granularity} fixture…`;
+    try {
+      const result = await runStrategy(spec);
+      $("run-result").style.display = "block";
+      $("run-agent").textContent = `${result.agent} · ${spec.symbol} ${spec.granularity}`;
+      renderMetrics(result.summary, $("run-metrics"));
+      render(result, $("run-badge"), $("run-checks"));
+      $("run-status").textContent =
+        "Done. Backtested, scored and verified in your browser, no server call.";
+    } catch (err) {
+      // Hide any prior verdict so a failed run never leaves a stale card up.
+      $("run-result").style.display = "none";
+      $("run-status").textContent =
+        spec.source === "live"
+          ? "Live fetch failed (network or symbol). " + err
+          : "Error: " + err;
+    }
+  });
+
+  // Read a FileList into { relativePath -> text }, keeping only report files.
+  // Match on exact basename (what verifyUploaded loads), so a stray old-equity.csv
+  // is not accepted by the UI then silently dropped by the verifier.
+  async function readReportFiles(fileList) {
+    const KEEP = new Set(["scorecard.json", "equity.csv", "trades.jsonl", "candles.json"]);
+    const wanted = (name) => {
+      const base = name.split("/").pop();
+      return KEEP.has(base) || base.startsWith("agent.snapshot.");
+    };
+    const out = {};
+    for (const f of fileList) {
+      const name = f.webkitRelativePath || f.name;
+      if (!wanted(name)) continue;
+      out[name] = await f.text();
+    }
+    return out;
+  }
+
+  async function doVerifyUpload(fileList) {
+    if (!fileList || fileList.length === 0) {
+      $("upload-status").textContent = "Pick a report folder or its files first.";
+      return;
+    }
+    $("upload-status").textContent = "Reading files and verifying in your browser…";
+    try {
+      const files = await readReportFiles(fileList);
+      if (!Object.keys(files).some((k) => k.endsWith("scorecard.json"))) {
+        $("upload-status").textContent = "No scorecard.json found in that selection.";
+        return;
+      }
+      const result = await verifyUploaded(files);
+      $("upload-result").style.display = "block";
+      $("up-agent").textContent = `${result.agent} · ${result.summary.symbol} ${result.summary.granularity}`;
+      renderMetrics(result.summary, $("up-metrics"));
+      render(result, $("up-badge"), $("up-checks"));
+      $("upload-status").textContent = result.pass
+        ? "Verified. The numbers reproduce on your machine."
+        : "Did not verify. See the checks above for what failed.";
+    } catch (err) {
+      $("upload-status").textContent = "Error: " + err;
+    }
+  }
+
+  $("upload-files-btn").addEventListener("click", () => doVerifyUpload($("upload").files));
+  $("pick-files").addEventListener("click", () => $("upload-files").click());
+  $("upload-files").addEventListener("change", (e) => doVerifyUpload(e.target.files));
 
   init();
 </script>

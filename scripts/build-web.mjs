@@ -30,6 +30,12 @@ const shims = join(root, "web", "shims");
 rmSync(docs, { recursive: true, force: true });
 mkdirSync(docs, { recursive: true });
 
+// The package version, read from the same package.json the package ships, so
+// the in-browser run stamps the same agentbenchVersion the CLI would. version.ts
+// reads it via readFileSync at module load, which cannot run in the browser, so
+// the browser entry takes it from this define instead.
+const pkgVersion = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
+
 // 1. Bundle the verifier with the node:* modules aliased to browser shims.
 await build({
   entryPoints: [join(root, "web", "verify-browser.ts")],
@@ -45,7 +51,10 @@ await build({
   },
   // import.meta.dirname is Node-only; force it undefined so defaultFixtureDir()
   // falls back to "." and resolves fixtures at /fixtures in the browser.
-  define: { "import.meta.dirname": "undefined" },
+  define: {
+    "import.meta.dirname": "undefined",
+    __AGENTBENCH_VERSION__: JSON.stringify(pkgVersion),
+  },
   logLevel: "info",
 });
 
