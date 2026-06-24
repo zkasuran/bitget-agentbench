@@ -71,6 +71,17 @@
   .check .detail { color: var(--dim); font-size: 13.5px; }
   .check .detail .diff { color: var(--red); }
   .muted { color: var(--dim); font-size: 13px; }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; font-size: 13.5px; }
+  .flow .step { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 7px 11px; }
+  .flow .step b { color: var(--text); font-weight: 600; }
+  .flow .arrow { color: var(--dim); }
+  .metrics { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+  .metric { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 7px 11px; min-width: 92px; }
+  .metric .k { display: block; font-size: 11px; color: var(--dim); letter-spacing: .02em; }
+  .metric .v { font-size: 15px; font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .metric .v.pos { color: var(--green); }
+  .metric .v.neg { color: var(--red); }
+  .legend { font-size: 12.5px; color: var(--dim); margin: 14px 0 0; }
   .hr { height: 1px; background: var(--line); margin: 22px 0; border: 0; }
   h2 { font-size: 15px; margin: 0 0 4px; }
   .demo-note { font-size: 13px; color: var(--dim); margin: 0 0 14px; }
@@ -87,6 +98,30 @@
     and the strategy is re-run from the manifest, on your machine, with no server
     in the loop. View source: it fetches static files and computes locally.
   </p>
+
+  <div class="card" id="intro">
+    <h2>What this is</h2>
+    <p class="muted" style="margin:6px 0 12px;">
+      AgentBench backtests a Bitget trading strategy on candle data, emits a
+      scorecard of the result and signs it, so a stranger can re-run the numbers
+      and confirm they are real. No API keys, no real money, no trust required.
+    </p>
+    <div class="flow">
+      <span class="step"><b>1. Backtest</b> a strategy on candles</span>
+      <span class="arrow">→</span>
+      <span class="step"><b>2. Score</b> it into a signed scorecard</span>
+      <span class="arrow">→</span>
+      <span class="step"><b>3. Verify</b> the numbers reproduce</span>
+    </div>
+    <p class="muted" style="margin:12px 0 0;">
+      You are on step 3. Below are 27 committed reports across 9 strategies
+      (buy-hold, sma, macd, momentum, donchian, atr, rsi, bollinger, vwap), each
+      on BTC, ETH and SOL. Pick one and verify, or doctor a number and watch it
+      get caught. The same <code>verify</code> ships in the
+      <a href="https://www.npmjs.com/package/bitget-agentbench">npm package</a>
+      and runs in CI on every commit.
+    </p>
+  </div>
 
   <div class="card">
     <div class="row">
@@ -106,7 +141,14 @@
       <span id="verdict-badge" class="badge run">…</span>
       <span id="verdict-agent" class="mono" style="font-size:15px;color:var(--dim);"></span>
     </div>
+    <div id="metrics" class="metrics"></div>
     <div id="checks"></div>
+    <p class="legend">
+      <b>integrity</b> the file was not edited after it was emitted.
+      <b>dataset</b> the candles re-hash to the claimed input.
+      <b>ledger</b> the metrics recompute from the trades.
+      <b>replay</b> re-running the strategy reproduces the metrics.
+    </p>
   </div>
 
   <hr class="hr" />
@@ -185,6 +227,23 @@
     badgeEl.textContent = result.pass ? "VERIFIED" : "FAILED";
     checksEl.innerHTML = result.checks.map(fmtCheck).join("");
   };
+  const num = (v, digits) => (typeof v === "number" ? v.toFixed(digits) : "—");
+  const signClass = (v) => (typeof v !== "number" ? "" : v > 0 ? "pos" : v < 0 ? "neg" : "");
+  const metricCell = (k, v, cls) =>
+    `<div class="metric"><span class="k">${esc(k)}</span><span class="v ${cls}">${esc(v)}</span></div>`;
+  const renderMetrics = (s, el) => {
+    if (!s) { el.innerHTML = ""; return; }
+    const ret = num(s.totalReturnPct, 2);
+    el.innerHTML = [
+      metricCell(`${s.symbol} ${s.granularity}`, `${s.bars} bars`, ""),
+      metricCell("return %", ret === "—" ? "—" : `${ret}`, signClass(s.totalReturnPct)),
+      metricCell("sharpe", num(s.sharpe, 2), signClass(s.sharpe)),
+      metricCell("max drawdown %", num(s.maxDrawdownPct, 2), "neg"),
+      metricCell("win rate %", num(s.winRatePct, 1), ""),
+      metricCell("trades", String(s.totalTrades ?? "—"), ""),
+      metricCell("data", esc(s.source), ""),
+    ].join("");
+  };
 
   async function init() {
     try {
@@ -206,6 +265,7 @@
       const result = await verifyByName(name);
       $("result").style.display = "block";
       $("verdict-agent").textContent = result.agent;
+      renderMetrics(result.summary, $("metrics"));
       render(result, $("verdict-badge"), $("checks"));
       $("status").textContent = "Done. Recomputed locally, no server call.";
     } catch (err) {

@@ -5636,6 +5636,22 @@ async function fetchText(rel) {
   if (!res.ok) throw new Error(`fetch ${rel} -> HTTP ${res.status}`);
   return res.text();
 }
+function summarize(scorecardText) {
+  const sc = JSON.parse(scorecardText);
+  const m = sc.metrics;
+  const man = sc.manifest;
+  return {
+    symbol: man.symbol,
+    granularity: man.granularity,
+    source: man.source,
+    bars: man.bars,
+    totalReturnPct: m.totalReturnPct,
+    sharpe: m.sharpe,
+    maxDrawdownPct: m.maxDrawdownPct,
+    winRatePct: m.winRatePct,
+    totalTrades: m.totalTrades
+  };
+}
 async function listReports() {
   const raw = await fetchText("reports-index.json");
   return JSON.parse(raw);
@@ -5658,7 +5674,8 @@ async function loadReportIntoVfs(name, scorecardText) {
 async function verifyByName(name) {
   const scorecardText = await fetchText(`reports/${name}/scorecard.json`);
   await loadReportIntoVfs(name, scorecardText);
-  return verifyReport(`/reports/${name}`);
+  const result = await verifyReport(`/reports/${name}`);
+  return { ...result, summary: summarize(scorecardText) };
 }
 async function verifyTampered(name, spec) {
   const scorecardText = await fetchText(`reports/${name}/scorecard.json`);

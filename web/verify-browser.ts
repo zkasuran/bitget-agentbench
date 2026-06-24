@@ -31,6 +31,43 @@ interface ReportInfo {
   agent: string;
 }
 
+/** Headline numbers shown next to a PASS, so the page reveals what the strategy
+ *  actually did, not only that the scorecard reproduces. Read straight off the
+ *  scorecard the verifier already loaded, so they cannot disagree with verify. */
+export interface ReportSummary {
+  symbol: string;
+  granularity: string;
+  source: string;
+  bars: number;
+  totalReturnPct: number;
+  sharpe: number;
+  maxDrawdownPct: number;
+  winRatePct: number;
+  totalTrades: number;
+}
+
+interface ScorecardLike {
+  metrics: Record<string, number>;
+  manifest: { symbol: string; granularity: string; source: string; bars: number };
+}
+
+function summarize(scorecardText: string): ReportSummary {
+  const sc = JSON.parse(scorecardText) as ScorecardLike;
+  const m = sc.metrics;
+  const man = sc.manifest;
+  return {
+    symbol: man.symbol,
+    granularity: man.granularity,
+    source: man.source,
+    bars: man.bars,
+    totalReturnPct: m.totalReturnPct,
+    sharpe: m.sharpe,
+    maxDrawdownPct: m.maxDrawdownPct,
+    winRatePct: m.winRatePct,
+    totalTrades: m.totalTrades,
+  };
+}
+
 /** Read the build-generated index of committed reports. */
 export async function listReports(): Promise<ReportInfo[]> {
   const raw = await fetchText("reports-index.json");
@@ -58,11 +95,15 @@ async function loadReportIntoVfs(name: string, scorecardText: string): Promise<v
   }
 }
 
-/** Verify a committed report exactly as the CLI would. */
-export async function verifyByName(name: string): Promise<VerifyResult> {
+/** Verify a committed report exactly as the CLI would. Carries the scorecard's
+ *  headline numbers so the page can show them next to the verdict. */
+export async function verifyByName(
+  name: string,
+): Promise<VerifyResult & { summary: ReportSummary }> {
   const scorecardText = await fetchText(`reports/${name}/scorecard.json`);
   await loadReportIntoVfs(name, scorecardText);
-  return verifyReport(`/reports/${name}`);
+  const result = await verifyReport(`/reports/${name}`);
+  return { ...result, summary: summarize(scorecardText) };
 }
 
 export interface TamperSpec {
