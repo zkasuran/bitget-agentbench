@@ -91,6 +91,40 @@
 </head>
 <body>
 <div class="wrap">
+  <noscript>
+    <div class="card" style="border-color: var(--accent);">
+      <h2>JavaScript is off</h2>
+      <p style="margin:6px 0 0;">
+        This page verifies scorecards in your browser, so it needs JavaScript.
+        The same checks run from the command line, anywhere Node 18+ does:
+        <code>npm i -g bitget-agentbench</code> then
+        <code>agentbench verify ./report</code>. Source and the committed
+        reports: <a href="https://github.com/zkasuran/bitget-agentbench">github.com/zkasuran/bitget-agentbench</a>.
+      </p>
+    </div>
+  </noscript>
+
+  <div id="compat" class="card" hidden style="border-color: var(--accent);">
+    <h2>Interactive demo could not start</h2>
+    <p id="compat-note" style="margin:6px 0 10px;">
+      This page runs the verifier in your browser, which needs a current browser
+      with ES modules. Yours could not start it. Everything here also runs from
+      the command line, which works anywhere Node 18+ does:
+    </p>
+    <pre class="mono" style="background:var(--panel2); border:1px solid var(--line); border-radius:7px; padding:10px 12px; overflow:auto; margin:0;">npm i -g bitget-agentbench
+agentbench verify ./report</pre>
+    <p style="margin:10px 0 0;">
+      Source and the committed reports:
+      <a href="https://github.com/zkasuran/bitget-agentbench">github.com/zkasuran/bitget-agentbench</a>.
+    </p>
+  </div>
+
+  <script nomodule>
+    // No ES module support: the in-browser verifier cannot run here. Reveal the
+    // fallback so the page still explains itself and points to the CLI.
+    document.getElementById("compat").hidden = false;
+  </script>
+
   <h1>Don't trust the scorecard. Check it.</h1>
   <p class="sub">
     This page re-runs <code>agentbench verify</code> on a committed report
@@ -291,11 +325,6 @@
 </div>
 
 <script type="module">
-  import {
-    listReports, verifyByName, verifyTampered,
-    runStrategy, verifyUploaded, strategyNames,
-  } from "./verify.bundle.js";
-
   const $ = (id) => document.getElementById(id);
   const esc = (v) =>
     String(v ?? "")
@@ -338,6 +367,14 @@
       metricCell("data", esc(s.source), ""),
     ].join("");
   };
+
+  // Everything below needs the bundled verifier. wire() receives the loaded
+  // module so a failed load surfaces as a message instead of a dead page.
+  function wire(bundle) {
+    const {
+      listReports, verifyByName, verifyTampered,
+      runStrategy, verifyUploaded, strategyNames,
+    } = bundle;
 
   async function init() {
     try {
@@ -420,7 +457,7 @@
       $("run-result").style.display = "none";
       $("run-status").textContent =
         spec.source === "live"
-          ? "Live fetch failed (network or symbol). " + err
+          ? "Live fetch failed (network, CORS or symbol): " + err + ". Switch Candles to fixture for an offline run."
           : "Error: " + err;
     }
   });
@@ -472,7 +509,24 @@
   $("pick-files").addEventListener("click", () => $("upload-files").click());
   $("upload-files").addEventListener("change", (e) => doVerifyUpload(e.target.files));
 
-  init();
+    init();
+  }
+
+  // Bootstrap. We are inside a module, so ES modules and JS work. fetch is the
+  // one Web API the verifier cannot do without (it loads the static reports,
+  // fixtures and, for a live run, candles). If it or the bundle is missing,
+  // reveal the CLI fallback instead of leaving a frozen page.
+  if (typeof fetch !== "function") {
+    $("compat-note").textContent =
+      "This browser has no fetch(), so the demo cannot load data. Use the CLI below instead.";
+    $("compat").hidden = false;
+  } else {
+    import("./verify.bundle.js").then(wire).catch((err) => {
+      $("compat-note").textContent =
+        "Could not load the verifier bundle (" + err + "). Reload, or use the CLI below.";
+      $("compat").hidden = false;
+    });
+  }
 </script>
 </body>
 </html>
