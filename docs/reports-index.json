@@ -1,5 +1,131 @@
 [
   {
+    "name": "atr-channel-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "atr-channel",
+    "source": "fixture"
+  },
+  {
+    "name": "atr-channel-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "atr-channel",
+    "source": "fixture"
+  },
+  {
+    "name": "atr-channel-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "atr-channel",
+    "source": "fixture"
+  },
+  {
+    "name": "bollinger-meanrev-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "bollinger-meanrev",
+    "source": "fixture"
+  },
+  {
+    "name": "bollinger-meanrev-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "bollinger-meanrev",
+    "source": "fixture"
+  },
+  {
+    "name": "bollinger-meanrev-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "bollinger-meanrev",
+    "source": "fixture"
+  },
+  {
+    "name": "buy-hold-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "buy-hold",
+    "source": "fixture"
+  },
+  {
+    "name": "buy-hold-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "buy-hold",
+    "source": "fixture"
+  },
+  {
+    "name": "buy-hold-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "buy-hold",
+    "source": "fixture"
+  },
+  {
+    "name": "donchian-breakout-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "donchian-breakout",
+    "source": "fixture"
+  },
+  {
+    "name": "donchian-breakout-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "donchian-breakout",
+    "source": "fixture"
+  },
+  {
+    "name": "donchian-breakout-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "donchian-breakout",
+    "source": "fixture"
+  },
+  {
+    "name": "macd-crossover-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "macd-crossover",
+    "source": "fixture"
+  },
+  {
+    "name": "macd-crossover-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "macd-crossover",
+    "source": "fixture"
+  },
+  {
+    "name": "macd-crossover-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "macd-crossover",
+    "source": "fixture"
+  },
+  {
+    "name": "momentum-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "momentum",
+    "source": "fixture"
+  },
+  {
+    "name": "momentum-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "momentum",
+    "source": "fixture"
+  },
+  {
+    "name": "momentum-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "momentum",
+    "source": "fixture"
+  },
+  {
     "name": "rsi-meanrev-BTCUSDT-4h",
     "symbol": "BTCUSDT",
     "granularity": "4h",
@@ -39,6 +165,27 @@
     "symbol": "SOLUSDT",
     "granularity": "4h",
     "agent": "sma-crossover",
+    "source": "fixture"
+  },
+  {
+    "name": "vwap-reversion-BTCUSDT-4h",
+    "symbol": "BTCUSDT",
+    "granularity": "4h",
+    "agent": "vwap-reversion",
+    "source": "fixture"
+  },
+  {
+    "name": "vwap-reversion-ETHUSDT-4h",
+    "symbol": "ETHUSDT",
+    "granularity": "4h",
+    "agent": "vwap-reversion",
+    "source": "fixture"
+  },
+  {
+    "name": "vwap-reversion-SOLUSDT-4h",
+    "symbol": "SOLUSDT",
+    "granularity": "4h",
+    "agent": "vwap-reversion",
     "source": "fixture"
   }
 ]

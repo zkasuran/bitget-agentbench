@@ -34,3 +34,18 @@ jobs:
             node dist/cli.js verify "$d"
             echo "::endgroup::"
           done
+      - name: Pages site is in sync
+        # The GitHub Pages verifier is served from the committed docs/ folder.
+        # Nothing rebuilds it on push, so it can silently lag the reports/ it
+        # mirrors (it once froze at six reports while reports/ had grown to
+        # twenty-seven). Rebuild it here and fail if the committed copy drifts,
+        # so the live site can never go stale again without CI going red.
+        run: |
+          npm run build:web
+          # --porcelain catches modified tracked files AND new untracked ones
+          # (a freshly added report dir is untracked, which a plain diff misses).
+          if [ -n "$(git status --porcelain -- docs/)" ]; then
+            echo "docs/ is stale: run 'npm run build:web' and commit the result"
+            git status --porcelain -- docs/
+            exit 1
+          fi

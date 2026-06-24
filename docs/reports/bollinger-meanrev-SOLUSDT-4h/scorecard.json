@@ -1,18 +1,18 @@
 {
-  "agent": "rsi-meanrev",
+  "agent": "bollinger-meanrev",
   "metrics": {
     "startingEquity": 10000,
-    "finalEquity": 9999.847597910828,
-    "totalReturnPct": -0.0015240208917202836,
-    "maxDrawdownPct": 0.0048738842394290965,
-    "sharpe": -0.8169026645462605,
-    "sortino": -0.5311841782075345,
-    "winRatePct": 73.33333333333333,
-    "profitFactor": 1.067774407786598,
-    "totalTrades": 15,
-    "totalFees": 0.028729179170000004,
-    "turnover": 0.002872943351635855,
-    "exposurePct": 51.022604951560815,
+    "finalEquity": 9999.596435325746,
+    "totalReturnPct": -0.004035646742540849,
+    "maxDrawdownPct": 0.005422868405712506,
+    "sharpe": -2.4105129869588895,
+    "sortino": -1.3434762935201814,
+    "winRatePct": 56.25,
+    "profitFactor": 0.5381146944111809,
+    "totalTrades": 16,
+    "totalFees": 0.029058804250000004,
+    "turnover": 0.002905952320726758,
+    "exposurePct": 36.167922497308936,
     "violations": 0
   },
   "manifest": {
@@ -36,5 +36,5 @@
       "maxPositionSize": 1
     }
   },
-  "scorecardSha256": "6ee0b8db7e2883bef897ca23e2802cb41249430c1644b95bd5ea7567c1912281"
+  "scorecardSha256": "aeee9bf62840cb272527f23bb6130fb0c31e14fb21b8741919a471f56029c4ab"
 }

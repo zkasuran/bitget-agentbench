@@ -1,18 +1,18 @@
 {
-  "agent": "rsi-meanrev",
+  "agent": "donchian-breakout",
   "metrics": {
     "startingEquity": 10000,
-    "finalEquity": 9999.847597910828,
-    "totalReturnPct": -0.0015240208917202836,
-    "maxDrawdownPct": 0.0048738842394290965,
-    "sharpe": -0.8169026645462605,
-    "sortino": -0.5311841782075345,
-    "winRatePct": 73.33333333333333,
-    "profitFactor": 1.067774407786598,
-    "totalTrades": 15,
-    "totalFees": 0.028729179170000004,
-    "turnover": 0.002872943351635855,
-    "exposurePct": 51.022604951560815,
+    "finalEquity": 9999.74526158827,
+    "totalReturnPct": -0.0025473841172970425,
+    "maxDrawdownPct": 0.0037551534554271975,
+    "sharpe": -1.9387898188123223,
+    "sortino": -1.1789313137111626,
+    "winRatePct": 22.22222222222222,
+    "profitFactor": 0.30877959121176163,
+    "totalTrades": 18,
+    "totalFees": 0.03403492173000001,
+    "turnover": 0.003403544174721282,
+    "exposurePct": 29.60172228202368,
     "violations": 0
   },
   "manifest": {
@@ -36,5 +36,5 @@
       "maxPositionSize": 1
     }
   },
-  "scorecardSha256": "6ee0b8db7e2883bef897ca23e2802cb41249430c1644b95bd5ea7567c1912281"
+  "scorecardSha256": "b7e68e71ee541282db1bbefe3eadc999aa82f4fdc72e755e1517fee23eb6d869"
 }

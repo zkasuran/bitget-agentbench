@@ -1,18 +1,18 @@
 {
-  "agent": "sma-crossover",
+  "agent": "bollinger-meanrev",
   "metrics": {
     "startingEquity": 10000,
-    "finalEquity": 9987.708577996817,
-    "totalReturnPct": -0.1229142200318347,
-    "maxDrawdownPct": 0.14886134577875104,
-    "sharpe": -3.4453102733032828,
-    "sortino": -2.2072312735589414,
-    "winRatePct": 15.789473684210526,
-    "profitFactor": 0.22258964047322857,
-    "totalTrades": 19,
-    "totalFees": 0.8722928331900001,
-    "turnover": 0.08728538454865438,
-    "exposurePct": 39.720129171151775,
+    "finalEquity": 9988.65086274785,
+    "totalReturnPct": -0.11349137252149376,
+    "maxDrawdownPct": 0.13088632232669248,
+    "sharpe": -3.123116361001677,
+    "sortino": -1.7473036806105238,
+    "winRatePct": 68.75,
+    "profitFactor": 0.31749148059524135,
+    "totalTrades": 16,
+    "totalFees": 0.74867048215,
+    "turnover": 0.07492509923567994,
+    "exposurePct": 36.38320775026911,
     "violations": 0
   },
   "manifest": {
@@ -36,5 +36,5 @@
       "maxPositionSize": 1
     }
   },
-  "scorecardSha256": "7724d02b7e20c94e89fbe6a16da8864535739c58278ef77531ecb042050e731d"
+  "scorecardSha256": "da3fa1ef550fb1cefcad9a0ab8858b7a73c3cff4e502b03567a0b9d39e849cb0"
 }

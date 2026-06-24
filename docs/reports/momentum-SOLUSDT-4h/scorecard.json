@@ -1,18 +1,18 @@
 {
-  "agent": "rsi-meanrev",
+  "agent": "momentum",
   "metrics": {
     "startingEquity": 10000,
-    "finalEquity": 9999.847597910828,
-    "totalReturnPct": -0.0015240208917202836,
-    "maxDrawdownPct": 0.0048738842394290965,
-    "sharpe": -0.8169026645462605,
-    "sortino": -0.5311841782075345,
-    "winRatePct": 73.33333333333333,
-    "profitFactor": 1.067774407786598,
-    "totalTrades": 15,
-    "totalFees": 0.028729179170000004,
-    "turnover": 0.002872943351635855,
-    "exposurePct": 51.022604951560815,
+    "finalEquity": 9999.54322497393,
+    "totalReturnPct": -0.004567750260703178,
+    "maxDrawdownPct": 0.0053570161418316845,
+    "sharpe": -2.67497529851351,
+    "sortino": -1.9227330573266181,
+    "winRatePct": 27.27272727272727,
+    "profitFactor": 0.3611285316548464,
+    "totalTrades": 44,
+    "totalFees": 0.08734093606999999,
+    "turnover": 0.008734311093149899,
+    "exposurePct": 44.02583423035522,
     "violations": 0
   },
   "manifest": {
@@ -36,5 +36,5 @@
       "maxPositionSize": 1
     }
   },
-  "scorecardSha256": "6ee0b8db7e2883bef897ca23e2802cb41249430c1644b95bd5ea7567c1912281"
+  "scorecardSha256": "714522beeca8ff3e802fd10914a516427d462d4dc49bb9faa3e1720bdf59be8a"
 }

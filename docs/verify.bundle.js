@@ -4505,8 +4505,8 @@ function sortKeys(value) {
   return value;
 }
 function computeScorecardSha256(scorecard) {
-  const { agent: agent3, metrics, manifest } = scorecard;
-  const canonical = canonicalJson({ agent: agent3, metrics, manifest });
+  const { agent: agent10, metrics, manifest } = scorecard;
+  const canonical = canonicalJson({ agent: agent10, metrics, manifest });
   return createHash("sha256").update(canonical).digest("hex");
 }
 
@@ -4685,13 +4685,13 @@ function defaultFixtureDir() {
 async function loadAgentFromFile(path) {
   const abs = resolve(path);
   const mod = await import(abs);
-  const agent3 = mod["default"] ?? mod["agent"];
-  if (!agent3 || typeof agent3.onBar !== "function") {
+  const agent10 = mod["default"] ?? mod["agent"];
+  if (!agent10 || typeof agent10.onBar !== "function") {
     throw new Error(
       `agent at ${abs} must export a default { onBar(bar, ctx) } or a named "agent"`
     );
   }
-  return agent3;
+  return agent10;
 }
 
 // src/engine/simulator.ts
@@ -4873,7 +4873,7 @@ function utcDayStart(ts) {
 
 // src/engine/backtest.ts
 async function runBacktest(input) {
-  const { agent: agent3, bars, config, risk, manifest: manifestInput } = input;
+  const { agent: agent10, bars, config, risk, manifest: manifestInput } = input;
   const state = newSimState(config.startingEquity);
   const fills = [];
   const violations = [];
@@ -4887,7 +4887,7 @@ async function runBacktest(input) {
     granularity: manifestInput.granularity,
     bars: bars.length
   };
-  await agent3.init?.(meta);
+  await agent10.init?.(meta);
   for (let i = 0; i < bars.length - 1; i++) {
     const currentBar = bars[i];
     const nextBar = bars[i + 1];
@@ -4905,7 +4905,7 @@ async function runBacktest(input) {
     };
     let orders;
     try {
-      orders = await agent3.onBar(currentBar, ctx);
+      orders = await agent10.onBar(currentBar, ctx);
     } catch (err) {
       violations.push({
         time: currentBar.time,
@@ -4972,7 +4972,7 @@ async function runBacktest(input) {
     risk
   };
   const scorecard = {
-    agent: agent3.name ?? "unnamed",
+    agent: agent10.name ?? "unnamed",
     metrics,
     manifest
   };
@@ -5055,10 +5055,257 @@ var agent2 = {
 };
 var rsi_meanrev_default = agent2;
 
+// src/strategies/buy-hold.ts
+var TRADE_SIZE3 = 0.01;
+var agent3 = {
+  name: "buy-hold",
+  onBar(_bar, ctx) {
+    const symbol = ctx.position.symbol || "BTCUSDT";
+    if (ctx.position.size <= 0) {
+      return [{ symbol, side: "buy", orderType: "market", size: TRADE_SIZE3, tag: "hold" }];
+    }
+    return [];
+  }
+};
+var buy_hold_default = agent3;
+
+// src/strategies/donchian-breakout.ts
+var ENTRY = 20;
+var EXIT = 10;
+var TRADE_SIZE4 = 0.01;
+function highestClose(bars, n) {
+  if (bars.length < n) return null;
+  return Math.max(...bars.slice(-n).map((b) => b.close));
+}
+function lowestClose(bars, n) {
+  if (bars.length < n) return null;
+  return Math.min(...bars.slice(-n).map((b) => b.close));
+}
+var agent4 = {
+  name: "donchian-breakout",
+  onBar(bar, ctx) {
+    const symbol = ctx.position.symbol || "BTCUSDT";
+    if (ctx.position.size <= 0) {
+      const priorHigh = highestClose(ctx.history, ENTRY);
+      if (priorHigh !== null && bar.close > priorHigh) {
+        return [{ symbol, side: "buy", orderType: "market", size: TRADE_SIZE4, tag: "breakout" }];
+      }
+      return [];
+    }
+    const priorLow = lowestClose(ctx.history, EXIT);
+    if (priorLow !== null && bar.close < priorLow) {
+      return [{ symbol, side: "sell", orderType: "market", size: ctx.position.size, tag: "breakdown" }];
+    }
+    return [];
+  }
+};
+var donchian_breakout_default = agent4;
+
+// src/strategies/bollinger-meanrev.ts
+var PERIOD2 = 20;
+var K2 = 2;
+var TRADE_SIZE5 = 0.01;
+function band(bars, period, k) {
+  if (bars.length < period) return null;
+  const closes = bars.slice(-period).map((b) => b.close);
+  const mean = closes.reduce((a, b) => a + b, 0) / period;
+  const variance = closes.reduce((a, b) => a + (b - mean) ** 2, 0) / period;
+  const sd = Math.sqrt(variance);
+  return { middle: mean, lower: mean - k * sd, upper: mean + k * sd };
+}
+var agent5 = {
+  name: "bollinger-meanrev",
+  onBar(bar, ctx) {
+    const b = band(ctx.history, PERIOD2, K2);
+    if (b === null) return [];
+    const symbol = ctx.position.symbol || "BTCUSDT";
+    if (ctx.position.size <= 0 && bar.close < b.lower) {
+      return [{ symbol, side: "buy", orderType: "market", size: TRADE_SIZE5, tag: "below-lower" }];
+    }
+    if (ctx.position.size > 0 && bar.close > b.middle) {
+      return [{ symbol, side: "sell", orderType: "market", size: ctx.position.size, tag: "revert-mean" }];
+    }
+    return [];
+  }
+};
+var bollinger_meanrev_default = agent5;
+
+// src/strategies/macd-crossover.ts
+var FAST2 = 12;
+var SLOW2 = 26;
+var SIGNAL = 9;
+var TRADE_SIZE6 = 0.01;
+function emaSeries(values, period) {
+  const out = new Array(values.length).fill(void 0);
+  if (values.length < period) return out;
+  const k = 2 / (period + 1);
+  let prev = 0;
+  for (let i = 0; i < period; i++) prev += values[i];
+  prev /= period;
+  out[period - 1] = prev;
+  for (let i = period; i < values.length; i++) {
+    prev = values[i] * k + prev * (1 - k);
+    out[i] = prev;
+  }
+  return out;
+}
+function macd(closes) {
+  const fast = emaSeries(closes, FAST2);
+  const slow = emaSeries(closes, SLOW2);
+  const macdLine = closes.map(
+    (_, i) => fast[i] !== void 0 && slow[i] !== void 0 ? fast[i] - slow[i] : void 0
+  );
+  const startIdx = SLOW2 - 1;
+  const defined = macdLine.slice(startIdx).filter((v) => v !== void 0);
+  const sig = emaSeries(defined, SIGNAL);
+  const signalLine = new Array(closes.length).fill(void 0);
+  for (let j = 0; j < sig.length; j++) {
+    if (sig[j] !== void 0) signalLine[startIdx + j] = sig[j];
+  }
+  const n = closes.length;
+  const macdNow = macdLine[n - 1];
+  const signalNow = signalLine[n - 1];
+  const macdPrev = macdLine[n - 2];
+  const signalPrev = signalLine[n - 2];
+  if (macdNow === void 0 || signalNow === void 0 || macdPrev === void 0 || signalPrev === void 0) {
+    return null;
+  }
+  return { macdNow, signalNow, macdPrev, signalPrev };
+}
+var agent6 = {
+  name: "macd-crossover",
+  onBar(bar, ctx) {
+    const closes = [...ctx.history, bar].map((b) => b.close);
+    const m = macd(closes);
+    if (m === null) return [];
+    const symbol = ctx.position.symbol || "BTCUSDT";
+    if (m.macdPrev <= m.signalPrev && m.macdNow > m.signalNow && ctx.position.size <= 0) {
+      return [{ symbol, side: "buy", orderType: "market", size: TRADE_SIZE6, tag: "macd-up" }];
+    }
+    if (m.macdPrev >= m.signalPrev && m.macdNow < m.signalNow && ctx.position.size > 0) {
+      return [{ symbol, side: "sell", orderType: "market", size: ctx.position.size, tag: "macd-down" }];
+    }
+    return [];
+  }
+};
+var macd_crossover_default = agent6;
+
+// src/strategies/vwap-reversion.ts
+var PERIOD3 = 20;
+var BAND = 5e-3;
+var TRADE_SIZE7 = 0.01;
+function vwap(bars, period) {
+  if (bars.length < period) return null;
+  const window = bars.slice(-period);
+  let pv = 0;
+  let vol = 0;
+  for (const b of window) {
+    const typical = (b.high + b.low + b.close) / 3;
+    pv += typical * b.volume;
+    vol += b.volume;
+  }
+  if (vol === 0) return null;
+  return pv / vol;
+}
+var agent7 = {
+  name: "vwap-reversion",
+  onBar(bar, ctx) {
+    const v = vwap(ctx.history, PERIOD3);
+    if (v === null) return [];
+    const symbol = ctx.position.symbol || "BTCUSDT";
+    if (ctx.position.size <= 0 && bar.close < v * (1 - BAND)) {
+      return [{ symbol, side: "buy", orderType: "market", size: TRADE_SIZE7, tag: "below-vwap" }];
+    }
+    if (ctx.position.size > 0 && bar.close >= v) {
+      return [{ symbol, side: "sell", orderType: "market", size: ctx.position.size, tag: "at-vwap" }];
+    }
+    return [];
+  }
+};
+var vwap_reversion_default = agent7;
+
+// src/strategies/atr-channel.ts
+var PERIOD4 = 20;
+var MULT = 1.5;
+var TRADE_SIZE8 = 0.01;
+function sma2(bars, period) {
+  if (bars.length < period) return null;
+  return bars.slice(-period).reduce((a, b) => a + b.close, 0) / period;
+}
+function atr(bars, period) {
+  if (bars.length < period + 1) return null;
+  const window = bars.slice(-(period + 1));
+  let sum = 0;
+  for (let i = 1; i < window.length; i++) {
+    const cur = window[i];
+    const prevClose = window[i - 1].close;
+    const tr = Math.max(
+      cur.high - cur.low,
+      Math.abs(cur.high - prevClose),
+      Math.abs(cur.low - prevClose)
+    );
+    sum += tr;
+  }
+  return sum / period;
+}
+var agent8 = {
+  name: "atr-channel",
+  onBar(bar, ctx) {
+    const middle = sma2(ctx.history, PERIOD4);
+    const range = atr(ctx.history, PERIOD4);
+    if (middle === null || range === null) return [];
+    const symbol = ctx.position.symbol || "BTCUSDT";
+    const upper = middle + MULT * range;
+    if (ctx.position.size <= 0 && bar.close > upper) {
+      return [{ symbol, side: "buy", orderType: "market", size: TRADE_SIZE8, tag: "above-channel" }];
+    }
+    if (ctx.position.size > 0 && bar.close < middle) {
+      return [{ symbol, side: "sell", orderType: "market", size: ctx.position.size, tag: "below-middle" }];
+    }
+    return [];
+  }
+};
+var atr_channel_default = agent8;
+
+// src/strategies/momentum.ts
+var LOOKBACK = 20;
+var TRADE_SIZE9 = 0.01;
+function trailingReturn(closes, lookback) {
+  if (closes.length < lookback + 1) return null;
+  const now = closes[closes.length - 1];
+  const past = closes[closes.length - 1 - lookback];
+  if (past === 0) return null;
+  return now / past - 1;
+}
+var agent9 = {
+  name: "momentum",
+  onBar(bar, ctx) {
+    const closes = [...ctx.history, bar].map((b) => b.close);
+    const ret = trailingReturn(closes, LOOKBACK);
+    if (ret === null) return [];
+    const symbol = ctx.position.symbol || "BTCUSDT";
+    if (ret > 0 && ctx.position.size <= 0) {
+      return [{ symbol, side: "buy", orderType: "market", size: TRADE_SIZE9, tag: `mom=${(ret * 100).toFixed(1)}%` }];
+    }
+    if (ret < 0 && ctx.position.size > 0) {
+      return [{ symbol, side: "sell", orderType: "market", size: ctx.position.size, tag: `mom=${(ret * 100).toFixed(1)}%` }];
+    }
+    return [];
+  }
+};
+var momentum_default = agent9;
+
 // src/strategies/registry.ts
 var STRATEGIES = {
   "sma-crossover": sma_crossover_default,
-  "rsi-meanrev": rsi_meanrev_default
+  "rsi-meanrev": rsi_meanrev_default,
+  "buy-hold": buy_hold_default,
+  "donchian-breakout": donchian_breakout_default,
+  "bollinger-meanrev": bollinger_meanrev_default,
+  "macd-crossover": macd_crossover_default,
+  "vwap-reversion": vwap_reversion_default,
+  "atr-channel": atr_channel_default,
+  momentum: momentum_default
 };
 
 // src/verify.ts
@@ -5298,29 +5545,29 @@ function findAgentSnapshot(dir) {
   }
 }
 async function checkReplay(dir, scorecard, opts) {
-  let agent3 = STRATEGIES[scorecard.agent];
+  let agent10 = STRATEGIES[scorecard.agent];
   let how = "built-in";
-  if (!agent3 && opts.agentPath) {
+  if (!agent10 && opts.agentPath) {
     try {
-      agent3 = await loadAgentFromFile(opts.agentPath);
+      agent10 = await loadAgentFromFile(opts.agentPath);
       how = `--agent ${opts.agentPath}`;
     } catch (err) {
       return { name: "replay", status: "skip", detail: `could not load --agent ${opts.agentPath}: ${String(err)}` };
     }
   }
-  if (!agent3 && opts.replayEmbedded) {
+  if (!agent10 && opts.replayEmbedded) {
     const snap = findAgentSnapshot(dir);
     if (!snap) {
       return { name: "replay", status: "skip", detail: "no embedded agent snapshot found in the report" };
     }
     try {
-      agent3 = await loadAgentFromFile(snap);
+      agent10 = await loadAgentFromFile(snap);
       how = `embedded ${basename(snap)}`;
     } catch (err) {
       return { name: "replay", status: "skip", detail: `could not load embedded agent ${basename(snap)}: ${String(err)}` };
     }
   }
-  if (!agent3) {
+  if (!agent10) {
     const hint = findAgentSnapshot(dir) ? `external agent "${scorecard.agent}". Pass --replay-embedded to re-run the agent snapshot in this report, or --agent <file>` : `external agent "${scorecard.agent}". Pass --agent <file> to replay it`;
     return { name: "replay", status: "skip", detail: hint };
   }
@@ -5336,7 +5583,7 @@ async function checkReplay(dir, scorecard, opts) {
     };
   }
   const { scorecard: replayed } = await runBacktest({
-    agent: agent3,
+    agent: agent10,
     bars,
     config: m.engine,
     risk: m.risk,

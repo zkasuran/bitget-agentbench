@@ -1,18 +1,18 @@
 {
-  "agent": "rsi-meanrev",
+  "agent": "buy-hold",
   "metrics": {
     "startingEquity": 10000,
-    "finalEquity": 9999.847597910828,
-    "totalReturnPct": -0.0015240208917202836,
-    "maxDrawdownPct": 0.0048738842394290965,
-    "sharpe": -0.8169026645462605,
-    "sortino": -0.5311841782075345,
-    "winRatePct": 73.33333333333333,
-    "profitFactor": 1.067774407786598,
-    "totalTrades": 15,
-    "totalFees": 0.028729179170000004,
-    "turnover": 0.002872943351635855,
-    "exposurePct": 51.022604951560815,
+    "finalEquity": 9999.4175226748,
+    "totalReturnPct": -0.005824773252006708,
+    "maxDrawdownPct": 0.007997826189108869,
+    "sharpe": -2.2640563848308926,
+    "sortino": -2.113873403999637,
+    "winRatePct": 0,
+    "profitFactor": 0,
+    "totalTrades": 0,
+    "totalFees": 0.0012521252,
+    "turnover": 0.00012521631238594406,
+    "exposurePct": 99.89235737351991,
     "violations": 0
   },
   "manifest": {
@@ -36,5 +36,5 @@
       "maxPositionSize": 1
     }
   },
-  "scorecardSha256": "6ee0b8db7e2883bef897ca23e2802cb41249430c1644b95bd5ea7567c1912281"
+  "scorecardSha256": "ba7043cd114f0412a83315c78d1a7da891b82c31ea66e00a1cf39b32ae308639"
 }

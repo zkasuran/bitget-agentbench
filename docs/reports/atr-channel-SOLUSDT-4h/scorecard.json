@@ -1,18 +1,18 @@
 {
-  "agent": "rsi-meanrev",
+  "agent": "atr-channel",
   "metrics": {
     "startingEquity": 10000,
-    "finalEquity": 9999.847597910828,
-    "totalReturnPct": -0.0015240208917202836,
-    "maxDrawdownPct": 0.0048738842394290965,
-    "sharpe": -0.8169026645462605,
-    "sortino": -0.5311841782075345,
-    "winRatePct": 73.33333333333333,
-    "profitFactor": 1.067774407786598,
-    "totalTrades": 15,
-    "totalFees": 0.028729179170000004,
-    "turnover": 0.002872943351635855,
-    "exposurePct": 51.022604951560815,
+    "finalEquity": 9999.557191930233,
+    "totalReturnPct": -0.004428080697671249,
+    "maxDrawdownPct": 0.005562002079286357,
+    "sharpe": -3.4785798238390564,
+    "sortino": -2.001734867786551,
+    "winRatePct": 13.636363636363635,
+    "profitFactor": 0.18824994946774215,
+    "totalTrades": 22,
+    "totalFees": 0.041007339770000005,
+    "turnover": 0.004100828709391373,
+    "exposurePct": 25.941872981700755,
     "violations": 0
   },
   "manifest": {
@@ -36,5 +36,5 @@
       "maxPositionSize": 1
     }
   },
-  "scorecardSha256": "6ee0b8db7e2883bef897ca23e2802cb41249430c1644b95bd5ea7567c1912281"
+  "scorecardSha256": "81ca2bbec235bc075299ff4b8b79570d09ba64f90429062b1ea3f200bff82db6"
 }

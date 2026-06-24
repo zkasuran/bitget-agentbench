@@ -1,18 +1,18 @@
 {
-  "agent": "rsi-meanrev",
+  "agent": "macd-crossover",
   "metrics": {
     "startingEquity": 10000,
-    "finalEquity": 9999.847597910828,
-    "totalReturnPct": -0.0015240208917202836,
-    "maxDrawdownPct": 0.0048738842394290965,
-    "sharpe": -0.8169026645462605,
-    "sortino": -0.5311841782075345,
-    "winRatePct": 73.33333333333333,
-    "profitFactor": 1.067774407786598,
-    "totalTrades": 15,
-    "totalFees": 0.028729179170000004,
-    "turnover": 0.002872943351635855,
-    "exposurePct": 51.022604951560815,
+    "finalEquity": 9999.52019499894,
+    "totalReturnPct": -0.004798050010595034,
+    "maxDrawdownPct": 0.005714583476214499,
+    "sharpe": -2.983536801106427,
+    "sortino": -2.1200163547646156,
+    "winRatePct": 25.71428571428571,
+    "profitFactor": 0.3966953618326914,
+    "totalTrades": 35,
+    "totalFees": 0.06291364106,
+    "turnover": 0.006291537905480195,
+    "exposurePct": 48.439181916038756,
     "violations": 0
   },
   "manifest": {
@@ -36,5 +36,5 @@
       "maxPositionSize": 1
     }
   },
-  "scorecardSha256": "6ee0b8db7e2883bef897ca23e2802cb41249430c1644b95bd5ea7567c1912281"
+  "scorecardSha256": "e2e0c337e46db09b112399d8af0596a5249852bae5f1a38b54ca35fcca115de2"
 }
