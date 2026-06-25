@@ -3,527 +3,883 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AgentBench: verify a scorecard in your browser</title>
-<meta name="description" content="Backtest, score and verify Bitget trading agents. A scorecard a stranger can re-run and check, with no API keys and no real money." />
+<title>AgentBench — prove a Bitget trading agent, don't screenshot it</title>
+<meta name="description" content="A backtest scorecard for Bitget Agent Hub trading agents that a stranger can re-run and check. No API keys, no real money. Doctor a number and watch the verdict turn red, live in your browser." />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="AgentBench: verify a scorecard in your browser" />
-<meta property="og:description" content="Backtest, score and verify Bitget trading agents. Re-run the scorecard and the numbers reproduce. If they do not, the verdict turns red." />
+<meta property="og:title" content="AgentBench — verify a Bitget trading agent in your browser" />
+<meta property="og:description" content="Trading agents make claims. AgentBench makes them checkable. Re-run the scorecard and the numbers reproduce. Doctor one and the verdict turns red." />
 <meta property="og:url" content="https://zkasuran.github.io/bitget-agentbench/" />
 <meta property="og:image" content="https://zkasuran.github.io/bitget-agentbench/social-card.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="AgentBench: verify a scorecard in your browser" />
-<meta name="twitter:description" content="Backtest, score and verify Bitget trading agents. Re-run the scorecard and the numbers reproduce. If they do not, the verdict turns red." />
+<meta name="twitter:title" content="AgentBench — verify a Bitget trading agent in your browser" />
+<meta name="twitter:description" content="Trading agents make claims. AgentBench makes them checkable. Doctor a number and the verdict turns red, live in your browser." />
 <meta name="twitter:image" content="https://zkasuran.github.io/bitget-agentbench/social-card.png" />
+<meta name="theme-color" content="#070b0a" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2319f0c0'/><stop offset='1' stop-color='%2300cffe'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='url(%23g)'/><text x='16' y='23' font-family='monospace' font-size='20' font-weight='700' text-anchor='middle' fill='%23043'>A</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 <style>
   :root {
-    --bg: #0b0e14; --panel: #11151f; --panel2: #1a212c; --line: #2a3340;
-    --text: #d7dce5; --dim: #8a93a6; --green: #3fb950; --red: #f85149;
-    --accent: #58a6ff;
+    /* Bitget-aqua on daylight: bright mint accent, near-black ink, paper surfaces. */
+    --aqua:      #00d6a0;   /* readable accent line / border */
+    --aqua-bri:  #19f0c0;   /* bright glow / gradient stop */
+    --cyan:      #00cffe;   /* gradient partner */
+    --ink:       #08110e;   /* primary text */
+    --ink-2:     #33433d;   /* secondary text */
+    --dim:       #6a7a73;   /* muted */
+    --paper:     #f4f7f6;   /* page background */
+    --surface:   #ffffff;   /* cards */
+    --surface-2: #eef3f1;   /* inset / chips */
+    --line:      #e0e7e4;   /* hairline */
+    --line-2:    #ccd6d2;
+    --night:     #070b0a;   /* hero band */
+    --night-2:   #0d1714;
+    --pass:      #0b8a60;   /* PASS text (bold, paired with glyph) */
+    --pass-bg:   #e7f7f0;
+    --fail:      #ce2c2c;   /* FAIL text */
+    --fail-bg:   #fdecec;
+    --skip:      #8a968f;
+    --radius:    14px;
+    --shadow:    0 1px 2px rgba(8,17,14,.04), 0 8px 28px rgba(8,17,14,.06);
+    --shadow-lg: 0 2px 6px rgba(8,17,14,.06), 0 20px 60px rgba(8,17,14,.12);
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
+
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.5;
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); line-height: 1.6;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   }
-  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
-  h1 { font-size: 26px; margin: 0 0 6px; }
-  .sub { color: var(--dim); margin: 0 0 28px; font-size: 15px; }
-  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  a { color: inherit; }
+  code, .mono, kbd { font-family: var(--mono); }
+  h1, h2, h3 { line-height: 1.15; letter-spacing: -0.01em; margin: 0; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+
+  /* skip link */
+  .skip {
+    position: absolute; left: -9999px; top: 0; z-index: 100;
+    background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 0 0 10px 0;
+  }
+  .skip:focus { left: 0; }
+
+  /* ---- top bar ---- */
+  header.bar {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(7,11,10,.82); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .bar .wrap { display: flex; align-items: center; gap: 14px; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 10px; color: #eafff8; font-weight: 600; letter-spacing: -0.02em; }
+  .brand .mark {
+    width: 26px; height: 26px; border-radius: 7px; flex: 0 0 auto;
+    background: linear-gradient(135deg, var(--aqua-bri), var(--cyan));
+    display: grid; place-items: center; color: #042; font-family: var(--mono); font-weight: 700; font-size: 15px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 4px 16px rgba(25,240,192,.35);
+  }
+  .brand .tag { color: #79f3d2; font-family: var(--mono); font-size: 12.5px; font-weight: 500; }
+  .bar nav { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .bar nav a {
+    color: #cfe9e1; text-decoration: none; font-size: 13.5px; padding: 7px 11px; border-radius: 8px;
+    transition: background .15s, color .15s;
+  }
+  .bar nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .bar nav a.cta { background: linear-gradient(135deg, var(--aqua-bri), var(--cyan)); color: #042; font-weight: 600; }
+  .bar nav a.cta:hover { filter: brightness(1.06); }
+  @media (max-width: 620px) { .bar nav a.ghost { display: none; } }
+
+  /* ---- hero (night band) ---- */
+  .hero {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(60% 80% at 78% -10%, rgba(0,207,254,.20), transparent 60%),
+      radial-gradient(55% 75% at 12% 0%, rgba(25,240,192,.22), transparent 58%),
+      linear-gradient(180deg, var(--night), var(--night-2));
+    color: #e9fff8;
+  }
+  .hero::after {
+    /* faint grid + grain for depth */
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 46px 46px; -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 40%, transparent 85%); mask-image: radial-gradient(120% 90% at 50% 0%, #000 40%, transparent 85%);
+  }
+  .hero .wrap { position: relative; z-index: 1; padding: 64px 22px 76px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: #6df0cc; margin: 0 0 18px; display: inline-flex; align-items: center; gap: 9px;
+    border: 1px solid rgba(109,240,204,.3); border-radius: 999px; padding: 6px 13px;
+    background: rgba(25,240,192,.06);
+  }
+  .eyebrow b { color: #bfffee; font-weight: 600; }
+  .hero h1 {
+    font-size: clamp(34px, 6vw, 60px); font-weight: 700; max-width: 16ch;
+    background: linear-gradient(180deg, #ffffff, #b9f7e6); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero h1 .accent {
+    background: linear-gradient(120deg, var(--aqua-bri), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero .lede {
+    font-size: clamp(16px, 2.2vw, 19px); color: #aecfc6; max-width: 56ch; margin: 22px 0 0;
+  }
+  .hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin: 32px 0 0; }
+  .btn {
+    font: inherit; cursor: pointer; border-radius: 10px; padding: 12px 18px; font-weight: 600; font-size: 15px;
+    border: 1px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 9px;
+    transition: transform .12s ease, filter .15s, background .15s, border-color .15s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 2px solid var(--aqua-bri); outline-offset: 3px; }
+  .btn-primary { background: linear-gradient(135deg, var(--aqua-bri), var(--cyan)); color: #042; }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary[disabled] { filter: grayscale(.5) brightness(.95); cursor: default; }
+  .btn-ghost { background: rgba(255,255,255,.05); color: #eafff8; border-color: rgba(255,255,255,.16); }
+  .btn-ghost:hover { background: rgba(255,255,255,.1); }
+
+  /* trust strip */
+  .trust { display: flex; flex-wrap: wrap; gap: 8px 10px; margin: 34px 0 0; }
+  .trust .pill {
+    font-family: var(--mono); font-size: 12.5px; color: #cdeee4;
+    border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
+    border-radius: 8px; padding: 6px 11px; display: inline-flex; align-items: center; gap: 7px;
+  }
+  .trust .pill b { color: var(--aqua-bri); font-weight: 600; }
+  .trust .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--aqua-bri); box-shadow: 0 0 8px var(--aqua-bri); }
+
+  /* ---- sections ---- */
+  section { padding: 64px 0; }
+  .kicker {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--aqua); font-weight: 600; margin: 0 0 12px;
+  }
+  .h2 { font-size: clamp(24px, 3.6vw, 34px); font-weight: 700; max-width: 22ch; }
+  .sec-lede { color: var(--ink-2); font-size: 17px; max-width: 62ch; margin: 14px 0 0; }
+
+  /* gap cards */
+  .gap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 30px; }
+  @media (max-width: 760px) { .gap-grid { grid-template-columns: 1fr; } }
   .card {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: 10px; padding: 20px; margin-bottom: 20px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; box-shadow: var(--shadow);
   }
-  label { display: block; font-size: 13px; color: var(--dim); margin-bottom: 6px; }
-  select, button, input {
-    font: inherit; color: var(--text); background: var(--panel2);
-    border: 1px solid var(--line); border-radius: 7px; padding: 9px 12px;
+  .gap-grid .card h3 { font-size: 16px; margin: 0 0 8px; display: flex; align-items: center; gap: 9px; }
+  .gap-grid .card .ic { width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; font-family: var(--mono); color: var(--aqua); font-weight: 600; flex: 0 0 auto; }
+  .gap-grid .card p { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+  .gap-grid .card .old { color: var(--fail); font-weight: 600; }
+  .gap-grid .card .new { color: var(--pass); font-weight: 600; }
+
+  /* demo */
+  .demo-wrap { margin-top: 30px; }
+  .demo {
+    background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--aqua);
+    border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden;
   }
-  select, input { width: 100%; }
-  button {
-    cursor: pointer; background: var(--panel2); transition: border-color .15s;
+  .demo-head {
+    display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #fff, #fafdfc);
   }
-  button:hover { border-color: var(--accent); }
-  button.primary { background: #1b3a2b; border-color: var(--green); color: #c6f6d5; }
-  button.danger { background: #3a1d1d; border-color: var(--red); color: #ffd3d0; }
-  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
-  .row > div { flex: 1; min-width: 200px; }
-  .verdict {
-    display: flex; align-items: center; gap: 12px; font-size: 20px;
-    font-weight: 600; margin: 4px 0 16px;
+  .demo-head .lights { display: flex; gap: 6px; }
+  .demo-head .lights i { width: 11px; height: 11px; border-radius: 50%; background: var(--line-2); display: inline-block; }
+  .demo-head .title { font-family: var(--mono); font-size: 13px; color: var(--dim); }
+  .demo-head .step { margin-left: auto; font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
+  .demo-body { padding: 22px 18px 8px; }
+  .demo-caption { min-height: 24px; font-size: 15px; color: var(--ink-2); margin: 0 0 16px; }
+  .demo-caption b { color: var(--ink); }
+  .demo-caption .neg { color: var(--fail); font-weight: 600; }
+  .demo-foot { padding: 0 18px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .demo-foot .note { font-size: 13px; color: var(--dim); flex: 1; min-width: 220px; }
+
+  /* verdict + checks (shared) */
+  .verdict { display: flex; align-items: center; gap: 12px; margin: 2px 0 16px; flex-wrap: wrap; }
+  .badge {
+    font-family: var(--mono); font-weight: 600; font-size: 14px; letter-spacing: .04em;
+    padding: 6px 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px;
   }
-  .verdict .badge {
-    padding: 4px 12px; border-radius: 6px; font-size: 14px; letter-spacing: .03em;
-  }
-  .badge.pass { background: #14361f; color: var(--green); border: 1px solid var(--green); }
-  .badge.fail { background: #3a1517; color: var(--red); border: 1px solid var(--red); }
-  .badge.run { background: var(--panel2); color: var(--dim); border: 1px solid var(--line); }
-  .check {
-    display: grid; grid-template-columns: 78px 96px 1fr; gap: 10px;
-    padding: 11px 0; border-top: 1px solid var(--line); align-items: baseline;
-  }
-  .check:first-child { border-top: 0; }
-  .check .name { font-weight: 600; }
-  .tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 5px; text-align: center; }
-  .tag.pass { background: #14361f; color: var(--green); }
-  .tag.fail { background: #3a1517; color: var(--red); }
-  .tag.skip { background: var(--panel2); color: var(--dim); }
-  .check .detail { color: var(--dim); font-size: 13.5px; }
-  .check .detail .diff { color: var(--red); }
-  .muted { color: var(--dim); font-size: 13px; }
-  .flow { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; font-size: 13.5px; }
-  .flow .step { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 7px 11px; }
-  .flow .step b { color: var(--text); font-weight: 600; }
-  .flow .arrow { color: var(--dim); }
-  .metrics { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
-  .metric { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 7px 11px; min-width: 92px; }
+  .badge.run { background: var(--surface-2); color: var(--dim); }
+  .badge.pass { background: var(--pass); color: #fff; }
+  .badge.fail { background: var(--fail); color: #fff; }
+  .badge .ico { font-weight: 700; }
+  .verdict .agent { font-family: var(--mono); font-size: 13.5px; color: var(--dim); }
+
+  .metrics { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+  .metric { background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 8px 12px; min-width: 92px; }
   .metric .k { display: block; font-size: 11px; color: var(--dim); letter-spacing: .02em; }
-  .metric .v { font-size: 15px; font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .metric .v.pos { color: var(--green); }
-  .metric .v.neg { color: var(--red); }
-  .legend { font-size: 12.5px; color: var(--dim); margin: 14px 0 0; }
-  .hr { height: 1px; background: var(--line); margin: 22px 0; border: 0; }
-  h2 { font-size: 15px; margin: 0 0 4px; }
-  .demo-note { font-size: 13px; color: var(--dim); margin: 0 0 14px; }
-  a { color: var(--accent); }
-  .foot { margin-top: 36px; font-size: 12.5px; color: var(--dim); }
+  .metric .v { font-family: var(--mono); font-size: 15px; font-weight: 600; }
+  .metric .v.pos { color: var(--pass); }
+  .metric .v.neg { color: var(--fail); }
+
+  .checks { border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+  .check { display: grid; grid-template-columns: 26px 92px 86px 1fr; gap: 10px; align-items: baseline; padding: 12px 14px; border-top: 1px solid var(--line); }
+  .check:first-child { border-top: 0; }
+  .check .ico { font-family: var(--mono); font-weight: 700; text-align: center; }
+  .check .name { font-family: var(--mono); font-weight: 600; font-size: 14px; }
+  .check .tag { font-family: var(--mono); font-size: 11.5px; font-weight: 600; padding: 2px 0; text-align: center; border-radius: 5px; }
+  .check .detail { color: var(--dim); font-size: 13px; }
+  .check .detail .diff { color: var(--fail); }
+  .check[data-status="pass"] .ico, .check[data-status="pass"] .tag { color: var(--pass); }
+  .check[data-status="fail"] .ico, .check[data-status="fail"] .tag { color: var(--fail); }
+  .check[data-status="skip"] .ico, .check[data-status="skip"] .tag { color: var(--skip); }
+  .check[data-status="pending"] { opacity: .4; }
+
+  /* sequential reveal of checks in the auto-demo */
+  .reveal-row { opacity: 0; transform: translateY(4px); }
+  .reveal-row.shown { opacity: 1; transform: none; transition: opacity .3s ease, transform .3s ease; }
+
+  /* tabs (try-it) */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: 11px; padding: 5px; margin-top: 28px; }
+  .tab {
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border: 0; background: transparent;
+    color: var(--ink-2); padding: 9px 15px; border-radius: 8px; transition: background .15s, color .15s;
+  }
+  .tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  .tab:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+  .panel { margin-top: 16px; }
+  .panel[hidden] { display: none; }
+
+  label { display: block; font-size: 12.5px; color: var(--dim); margin-bottom: 6px; font-weight: 500; }
+  select, input, button.field {
+    font: inherit; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line-2); border-radius: 9px; padding: 10px 12px; width: 100%;
+  }
+  select:focus, input:focus { outline: 2px solid var(--aqua); outline-offset: 1px; border-color: var(--aqua); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+  .row > div { flex: 1; min-width: 180px; }
+  .row .narrow { flex: 0 0 120px; min-width: 110px; }
+  .row .go { flex: 0 0 auto; }
+  .status { font-size: 13.5px; color: var(--dim); margin-top: 12px; }
+  .result { margin-top: 16px; }
+  .result[hidden] { display: none; }
+
+  /* four-check explainer */
+  .checks4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 28px; }
+  @media (max-width: 700px) { .checks4 { grid-template-columns: 1fr; } }
+  .checks4 .card { display: flex; gap: 14px; }
+  .checks4 .n { font-family: var(--mono); font-weight: 700; color: var(--aqua); font-size: 14px; flex: 0 0 auto; width: 78px; }
+  .checks4 .card h3 { font-size: 15px; margin: 0 0 5px; }
+  .checks4 .card p { margin: 0; color: var(--ink-2); font-size: 14px; }
+  .layer-note { margin-top: 20px; padding: 16px 18px; border-radius: var(--radius); background: var(--ink); color: #dff7ef; font-size: 14.5px; }
+  .layer-note b { color: var(--aqua-bri); }
+
+  /* ecosystem */
+  .eco-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 28px; }
+  @media (max-width: 760px) { .eco-grid { grid-template-columns: 1fr; } }
+  .eco .card h3 { font-size: 16px; margin: 0 0 8px; }
+  .eco .card p { margin: 0 0 12px; color: var(--ink-2); font-size: 14.5px; }
+  pre.code {
+    margin: 0; background: var(--night); color: #d7f6ec; border-radius: 10px; padding: 14px 16px;
+    overflow: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+  }
+  pre.code .c { color: #6df0cc; }
+  pre.code .k { color: #8fd0ff; }
+
+  /* footer */
+  footer { background: var(--night); color: #aecfc6; padding: 48px 0; margin-top: 24px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 28px; justify-content: space-between; }
+  footer h4 { color: #eafff8; font-size: 14px; margin: 0 0 10px; }
+  footer a { color: #9fe6d3; text-decoration: none; display: block; padding: 3px 0; font-size: 14px; }
+  footer a:hover { color: var(--aqua-bri); }
+  footer code { color: #c7e8df; }
+  footer .disclosure { max-width: 46ch; font-size: 13px; color: #7e948c; }
+  footer .disclosure b { color: #c7e8df; }
+
+  /* scroll reveal */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal, .reveal-row { opacity: 1 !important; transform: none !important; transition: none !important; }
+  }
+
+  /* fallback cards */
+  .fallback { border-color: var(--aqua); }
+  .fallback pre { background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; overflow: auto; font-family: var(--mono); font-size: 13px; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <noscript>
-    <div class="card" style="border-color: var(--accent);">
-      <h2>JavaScript is off</h2>
-      <p style="margin:6px 0 0;">
-        This page verifies scorecards in your browser, so it needs JavaScript.
-        The same checks run from the command line, anywhere Node 18+ does:
-        <code>npm i -g bitget-agentbench</code> then
-        <code>agentbench verify ./report</code>. Source and the committed
-        reports: <a href="https://github.com/zkasuran/bitget-agentbench">github.com/zkasuran/bitget-agentbench</a>.
+<a class="skip" href="#try">Skip to the verifier</a>
+
+<header class="bar">
+  <div class="wrap">
+    <span class="brand">
+      <span class="mark" aria-hidden="true">A</span>
+      AgentBench <span class="tag">for Bitget</span>
+    </span>
+    <nav>
+      <a class="ghost" href="https://github.com/zkasuran/bitget-agentbench">GitHub</a>
+      <a class="ghost" href="https://www.npmjs.com/package/bitget-agentbench">npm</a>
+      <a class="cta" href="#try">Verify a report</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ============ HERO ============ -->
+  <section class="hero" aria-labelledby="h1">
+    <div class="wrap">
+      <span class="eyebrow">Built for the <b>Bitget Agent Hub</b> ecosystem</span>
+      <h1 id="h1">Trading agents make claims. <span class="accent">AgentBench makes them checkable.</span></h1>
+      <p class="lede">
+        A backtest scorecard for a Bitget trading agent that a stranger can re-run
+        and confirm, with no API keys and no real money. Doctor a single number and
+        the verdict turns red, live in your browser. No video, no install, no trust.
+      </p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="#demo">Watch it catch a lie &darr;</a>
+        <a class="btn btn-ghost" href="#try">Verify one yourself</a>
+      </div>
+      <div class="trust" aria-label="project facts">
+        <span class="pill"><span class="dot" aria-hidden="true"></span> npm <b>v0.5.0</b></span>
+        <span class="pill"><b>149</b> tests passing</span>
+        <span class="pill"><b id="report-count">27</b> reproducible reports</span>
+        <span class="pill">9 strategies</span>
+        <span class="pill">CI <b>green</b></span>
+        <span class="pill">MIT</span>
+        <span class="pill">zero keys / zero real money</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ THE GAP ============ -->
+  <section aria-labelledby="gap-h">
+    <div class="wrap">
+      <p class="kicker">The gap</p>
+      <h2 class="h2 reveal" id="gap-h">Agent Hub lets an agent trade. It can't tell you the agent is any good.</h2>
+      <p class="sec-lede reveal">
+        There's no replay, no fill simulation, no PnL or drawdown accounting and
+        nothing a third party can re-run. So every team either trusts a screenshot
+        or trades live to get evidence. AgentBench fills that gap and closes it
+        with verification.
+      </p>
+      <div class="gap-grid">
+        <div class="card reveal">
+          <h3><span class="ic" aria-hidden="true">?</span> Today</h3>
+          <p>An agent posts a chart and a number. You either <span class="old">trust it</span> or you don't. A screenshot proves nothing.</p>
+        </div>
+        <div class="card reveal">
+          <h3><span class="ic" aria-hidden="true">$</span> The other option</h3>
+          <p>Trade live to get real evidence. That <span class="old">costs real money</span> and risks a runaway agent.</p>
+        </div>
+        <div class="card reveal">
+          <h3><span class="ic" aria-hidden="true">&check;</span> AgentBench</h3>
+          <p>A scorecard whose every number <span class="new">recomputes from the trades</span>. Re-run it and check, on a fresh clone, in seconds.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AUTO DEMO ============ -->
+  <section id="demo" aria-labelledby="demo-h">
+    <div class="wrap">
+      <p class="kicker">See it, no video needed</p>
+      <h2 class="h2 reveal" id="demo-h">A real scorecard verifies. Then we doctor one number.</h2>
+      <p class="sec-lede reveal">
+        Everything below runs the real verifier on a committed report, in this
+        browser, no server in the loop. It plays on its own when it scrolls into
+        view. The file on disk is never touched, the tamper happens in memory.
+      </p>
+
+      <div class="demo-wrap reveal">
+        <div class="demo" id="demo-card">
+          <div class="demo-head">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="title mono">agentbench verify</span>
+            <span class="step mono" id="demo-step">ready</span>
+          </div>
+          <div class="demo-body">
+            <p class="demo-caption" id="demo-caption" aria-live="polite">Scroll here to start, or press play.</p>
+            <div class="verdict">
+              <span class="badge run" id="demo-badge" aria-live="polite">idle</span>
+              <span class="agent mono" id="demo-agent"></span>
+            </div>
+            <div class="metrics" id="demo-metrics"></div>
+            <div class="checks" id="demo-checks"></div>
+          </div>
+          <div class="demo-foot">
+            <button class="btn btn-primary" id="demo-replay" type="button" style="padding:9px 15px;font-size:14px;">&#9654; Play again</button>
+            <span class="note">integrity, dataset, ledger and replay each recompute from scratch. Re-stamping the hash can't save a doctored number.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRY IT ============ -->
+  <section id="try" aria-labelledby="try-h">
+    <div class="wrap">
+      <p class="kicker">Your turn</p>
+      <h2 class="h2 reveal" id="try-h">Verify it yourself. Four ways, one engine.</h2>
+      <p class="sec-lede reveal">
+        The same <code>verify</code> that ships in the npm package and runs in CI,
+        compiled for the browser. Pick a committed report, run a fresh strategy,
+        doctor a number, or drop in a report you produced with the CLI.
+      </p>
+
+      <noscript>
+        <div class="card fallback" style="margin-top:24px;">
+          <h3>JavaScript is off</h3>
+          <p style="color:var(--ink-2);margin:6px 0 10px;">This panel verifies scorecards in your browser, so it needs JavaScript. The same checks run from the command line, anywhere Node 18+ does:</p>
+          <pre>npm i -g bitget-agentbench
+agentbench verify ./report</pre>
+        </div>
+      </noscript>
+
+      <div id="compat" class="card fallback" hidden style="margin-top:24px;">
+        <h3>Interactive demo could not start</h3>
+        <p id="compat-note" style="color:var(--ink-2);margin:6px 0 10px;">This page runs the verifier in your browser, which needs a current browser with ES modules. Everything here also runs from the command line:</p>
+        <pre>npm i -g bitget-agentbench
+agentbench verify ./report</pre>
+        <p style="color:var(--ink-2);margin:10px 0 0;">Source and committed reports: <a href="https://github.com/zkasuran/bitget-agentbench">github.com/zkasuran/bitget-agentbench</a>.</p>
+      </div>
+      <script nomodule>document.getElementById("compat").hidden = false;</script>
+
+      <div id="try-ui" hidden>
+        <div class="tabs" role="tablist" aria-label="Ways to verify">
+          <button class="tab" role="tab" id="tab-verify" aria-controls="panel-verify" aria-selected="true">Verify a report</button>
+          <button class="tab" role="tab" id="tab-run" aria-controls="panel-run" aria-selected="false">Run a strategy</button>
+          <button class="tab" role="tab" id="tab-tamper" aria-controls="panel-tamper" aria-selected="false">Doctor a number</button>
+          <button class="tab" role="tab" id="tab-upload" aria-controls="panel-upload" aria-selected="false">Upload your own</button>
+        </div>
+
+        <!-- verify -->
+        <div class="panel" id="panel-verify" role="tabpanel" aria-labelledby="tab-verify">
+          <div class="card">
+            <div class="row">
+              <div>
+                <label for="v-report">Committed report</label>
+                <select id="v-report"></select>
+              </div>
+              <div class="go"><button class="btn btn-primary" id="v-go" type="button">Verify</button></div>
+            </div>
+            <p class="status" id="v-status" aria-live="polite">Loading reports&hellip;</p>
+            <div class="result" id="v-result" hidden>
+              <div class="verdict"><span class="badge run" id="v-badge" aria-live="polite">&hellip;</span><span class="agent mono" id="v-agent"></span></div>
+              <div class="metrics" id="v-metrics"></div>
+              <div class="checks" id="v-checks"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- run -->
+        <div class="panel" id="panel-run" role="tabpanel" aria-labelledby="tab-run" hidden>
+          <div class="card">
+            <div class="row">
+              <div><label for="r-strategy">Strategy</label><select id="r-strategy"></select></div>
+              <div class="narrow"><label for="r-symbol">Symbol</label><input id="r-symbol" class="mono" value="BTCUSDT" /></div>
+              <div class="narrow"><label for="r-tf">Timeframe</label>
+                <select id="r-tf"><option>1h</option><option selected>4h</option><option>1day</option></select></div>
+              <div class="narrow"><label for="r-source">Candles</label>
+                <select id="r-source"><option value="live">live (Bitget)</option><option value="fixture">fixture (offline)</option></select></div>
+              <div class="narrow"><label for="r-limit">Live limit</label><input id="r-limit" class="mono" value="200" /></div>
+              <div class="go"><button class="btn btn-primary" id="r-go" type="button">Run &amp; verify</button></div>
+            </div>
+            <p class="status" id="r-status" aria-live="polite">Live fetch needs network (Bitget's keyless public endpoint). Fixtures: BTCUSDT, ETHUSDT, SOLUSDT at 4h, fully offline.</p>
+            <div class="result" id="r-result" hidden>
+              <div class="verdict"><span class="badge run" id="r-badge" aria-live="polite">&hellip;</span><span class="agent mono" id="r-agent"></span></div>
+              <div class="metrics" id="r-metrics"></div>
+              <div class="checks" id="r-checks"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- tamper -->
+        <div class="panel" id="panel-tamper" role="tabpanel" aria-labelledby="tab-tamper" hidden>
+          <div class="card">
+            <p style="margin:0 0 14px;color:var(--ink-2);font-size:14.5px;">Edit one number in a committed scorecard and verify the doctored copy. Watch the verdict flip and the checks that caught it light up red. The file on disk is never touched.</p>
+            <div class="row">
+              <div><label for="t-report">Report</label><select id="t-report"></select></div>
+              <div><label for="t-field">Field</label>
+                <select id="t-field">
+                  <option value="metrics.totalReturnPct">metrics.totalReturnPct</option>
+                  <option value="metrics.maxDrawdownPct">metrics.maxDrawdownPct</option>
+                  <option value="metrics.sharpe">metrics.sharpe</option>
+                  <option value="metrics.winRatePct">metrics.winRatePct</option>
+                </select></div>
+              <div class="narrow"><label for="t-value">New value</label><input id="t-value" class="mono" value="99" /></div>
+              <div class="go"><button class="btn btn-primary" id="t-go" type="button">Doctor &amp; verify</button></div>
+            </div>
+            <p class="status" id="t-status" aria-live="polite"></p>
+            <div class="result" id="t-result" hidden>
+              <div class="verdict"><span class="badge run" id="t-badge" aria-live="polite">&hellip;</span><span class="agent mono" id="t-note"></span></div>
+              <div class="checks" id="t-checks"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- upload -->
+        <div class="panel" id="panel-upload" role="tabpanel" aria-labelledby="tab-upload" hidden>
+          <div class="card">
+            <p style="margin:0 0 14px;color:var(--ink-2);font-size:14.5px;">Ran <code>agentbench run --out ./report</code> on your machine? Drop the folder here (or its files: scorecard.json, equity.csv, trades.jsonl and, for a live run, candles.json). They never leave your browser.</p>
+            <div class="row">
+              <div><label for="u-dir">Report folder or files</label><input id="u-dir" type="file" multiple webkitdirectory /></div>
+              <div class="go"><button class="btn btn-primary" id="u-go" type="button">Verify upload</button></div>
+            </div>
+            <p class="status">Folder picker not cooperating? <button id="u-pick" class="field" style="width:auto;padding:5px 10px;cursor:pointer;">pick files instead</button> <input id="u-files" type="file" multiple style="display:none;" /></p>
+            <p class="status" id="u-status" aria-live="polite"></p>
+            <div class="result" id="u-result" hidden>
+              <div class="verdict"><span class="badge run" id="u-badge" aria-live="polite">&hellip;</span><span class="agent mono" id="u-agent"></span></div>
+              <div class="metrics" id="u-metrics"></div>
+              <div class="checks" id="u-checks"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW VERIFY WORKS ============ -->
+  <section aria-labelledby="how-h" style="background:var(--surface-2);">
+    <div class="wrap">
+      <p class="kicker">How verify works</p>
+      <h2 class="h2 reveal" id="how-h">Four independent checks. Any one fails, the verdict fails.</h2>
+      <div class="checks4">
+        <div class="card reveal"><div class="n">integrity</div><div><h3>The file was not edited</h3><p>Recomputes the scorecard's content hash and asserts it matches. Catches any edit to <code>scorecard.json</code>.</p></div></div>
+        <div class="card reveal"><div class="n">dataset</div><div><h3>The candles are the claimed ones</h3><p>Reloads the candles named in the manifest, re-hashes them (SHA-256) and asserts the match. Catches swapped or doctored price data.</p></div></div>
+        <div class="card reveal"><div class="n">ledger</div><div><h3>The metrics follow from the trades</h3><p>Recomputes every headline metric straight from the trade ledger and equity curve. Catches numbers that don't follow from the fills.</p></div></div>
+        <div class="card reveal"><div class="n">replay</div><div><h3>The strategy reproduces the run</h3><p>Re-runs the strategy from the manifest's own seed and config. The strongest check. Built-ins replay automatically, your own with <code>--agent</code>.</p></div></div>
+      </div>
+      <p class="layer-note reveal">A content hash alone only proves a file was not edited. A forger could change a number and <b>re-stamp the hash</b>. They still can't beat ledger and replay, which recompute the numbers from scratch. That layering is the point.</p>
+    </div>
+  </section>
+
+  <!-- ============ ECOSYSTEM FIT ============ -->
+  <section class="eco" aria-labelledby="eco-h">
+    <div class="wrap">
+      <p class="kicker">Bitget ecosystem fit</p>
+      <h2 class="h2 reveal" id="eco-h">It speaks Agent Hub, and slots next to the official Bitget MCP.</h2>
+      <div class="eco-grid">
+        <div class="card reveal">
+          <h3>Drop in an Agent Hub agent</h3>
+          <p>Agent Hub agents place trades with <code>spot_place_order</code>. That's exactly AgentBench's order shape, so <code>fromAgentHub</code> wraps an existing agent with no rewrite.</p>
+<pre class="code"><span class="k">import</span> { fromAgentHub } <span class="k">from</span> "bitget-agentbench";
+
+<span class="k">export default</span> fromAgentHub("my-hub-agent", decide);
+<span class="c">// decide(bar, ctx) returns the same spot_place_order calls</span></pre>
+        </div>
+        <div class="card reveal">
+          <h3>Agents grading agents, over MCP</h3>
+          <p>Ships an MCP server with two tools, so an agent in Claude or Cursor can backtest and grade a strategy inside its own loop, beside the official Bitget MCP server.</p>
+<pre class="code">claude mcp add -s user agentbench -- \
+  npx -y -p bitget-agentbench agentbench-mcp
+<span class="c">// agentbench_run -> scorecard, agentbench_verify -> PASS/FAIL</span></pre>
+        </div>
+        <div class="card reveal">
+          <h3>Verify in CI</h3>
+          <p>A committed scorecard should fail the build if its numbers stop reproducing. One action line does it, and this repo dogfoods it on every push.</p>
+<pre class="code"><span class="k">- uses</span>: zkasuran/bitget-agentbench@v0.5.0
+  <span class="k">with</span>:
+    report: ./report</pre>
+        </div>
+        <div class="card reveal">
+          <h3>Zero setup, real data</h3>
+          <p>Ships real Bitget candle fixtures, so a full backtest runs the moment it's installed. Live mode pulls from Bitget's keyless public endpoint and snapshots the exact candles, so a live run stays checkable too.</p>
+<pre class="code">npx agentbench run --strategy sma-crossover \
+  --symbol BTCUSDT --tf 4h --seed 42 --out ./report
+npx agentbench verify ./report</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer aria-labelledby="foot-h">
+  <div class="wrap">
+    <div>
+      <h4 id="foot-h">AgentBench for Bitget</h4>
+      <p class="disclosure">
+        Runs the real <code>runBacktest</code> and <code>verifyReport</code>,
+        bundled for the browser, the same SHA-256 as the CLI (proven byte-identical
+        by a test). Live candles come from Bitget's keyless public endpoint.
+        Nothing you run or upload leaves your browser.
+      </p>
+      <p class="disclosure" style="margin-top:14px;">
+        <b>AI disclosure:</b> built with substantial help from Claude (Anthropic).
+        A human reviewed the design, the financial formulas and the verification
+        logic, and verified it locally: 149 tests, clean type-check, byte-identical
+        re-runs and <code>verify</code> passing on every committed report.
       </p>
     </div>
-  </noscript>
-
-  <div id="compat" class="card" hidden style="border-color: var(--accent);">
-    <h2>Interactive demo could not start</h2>
-    <p id="compat-note" style="margin:6px 0 10px;">
-      This page runs the verifier in your browser, which needs a current browser
-      with ES modules. Yours could not start it. Everything here also runs from
-      the command line, which works anywhere Node 18+ does:
-    </p>
-    <pre class="mono" style="background:var(--panel2); border:1px solid var(--line); border-radius:7px; padding:10px 12px; overflow:auto; margin:0;">npm i -g bitget-agentbench
-agentbench verify ./report</pre>
-    <p style="margin:10px 0 0;">
-      Source and the committed reports:
-      <a href="https://github.com/zkasuran/bitget-agentbench">github.com/zkasuran/bitget-agentbench</a>.
-    </p>
-  </div>
-
-  <script nomodule>
-    // No ES module support: the in-browser verifier cannot run here. Reveal the
-    // fallback so the page still explains itself and points to the CLI.
-    document.getElementById("compat").hidden = false;
-  </script>
-
-  <h1>Don't trust the scorecard. Check it.</h1>
-  <p class="sub">
-    This page re-runs <code>agentbench verify</code> on a committed report
-    entirely in your browser. The numbers are recomputed from the trade ledger
-    and the strategy is re-run from the manifest, on your machine, with no server
-    in the loop. View source: it fetches static files and computes locally.
-  </p>
-
-  <div class="card" id="intro">
-    <h2>What this is</h2>
-    <p class="muted" style="margin:6px 0 12px;">
-      AgentBench backtests a Bitget trading strategy on candle data, emits a
-      scorecard of the result and signs it, so a stranger can re-run the numbers
-      and confirm they are real. No API keys, no real money, no trust required.
-    </p>
-    <div class="flow">
-      <span class="step"><b>1. Backtest</b> a strategy on candles</span>
-      <span class="arrow">→</span>
-      <span class="step"><b>2. Score</b> it into a signed scorecard</span>
-      <span class="arrow">→</span>
-      <span class="step"><b>3. Verify</b> the numbers reproduce</span>
-    </div>
-    <p class="muted" style="margin:12px 0 0;">
-      You are on step 3. Below are 27 committed reports across 9 strategies
-      (buy-hold, sma, macd, momentum, donchian, atr, rsi, bollinger, vwap), each
-      on BTC, ETH and SOL. Pick one and verify, or doctor a number and watch it
-      get caught. The same <code>verify</code> ships in the
+    <div>
+      <h4>Links</h4>
+      <a href="https://github.com/zkasuran/bitget-agentbench">GitHub repo</a>
       <a href="https://www.npmjs.com/package/bitget-agentbench">npm package</a>
-      and runs in CI on every commit.
-    </p>
-  </div>
-
-  <div class="card">
-    <div class="row">
-      <div>
-        <label for="report">Committed report</label>
-        <select id="report"></select>
-      </div>
-      <div style="flex:0 0 auto;">
-        <button id="verify" class="primary">Verify</button>
-      </div>
-    </div>
-    <div id="status" class="muted" style="margin-top:12px;">Loading reports…</div>
-  </div>
-
-  <div class="card" id="result" style="display:none;">
-    <div class="verdict">
-      <span id="verdict-badge" class="badge run">…</span>
-      <span id="verdict-agent" class="mono" style="font-size:15px;color:var(--dim);"></span>
-    </div>
-    <div id="metrics" class="metrics"></div>
-    <div id="checks"></div>
-    <p class="legend">
-      <b>integrity</b> the file was not edited after it was emitted.
-      <b>dataset</b> the candles re-hash to the claimed input.
-      <b>ledger</b> the metrics recompute from the trades.
-      <b>replay</b> re-running the strategy reproduces the metrics.
-    </p>
-  </div>
-
-  <hr class="hr" />
-
-  <h2>Run your own</h2>
-  <p class="demo-note">
-    Pick a strategy and a market, then run it here. With <b>live</b> it fetches
-    fresh candles from Bitget's public keyless endpoint in your browser (no key,
-    no account, no real money), backtests, scores and verifies, all on your
-    machine. With <b>fixture</b> it uses the committed candles, fully offline.
-  </p>
-  <div class="card">
-    <div class="row">
-      <div>
-        <label for="run-strategy">Strategy</label>
-        <select id="run-strategy"></select>
-      </div>
-      <div style="flex:0 0 120px;min-width:120px;">
-        <label for="run-symbol">Symbol</label>
-        <input id="run-symbol" class="mono" value="BTCUSDT" />
-      </div>
-      <div style="flex:0 0 100px;min-width:100px;">
-        <label for="run-tf">Timeframe</label>
-        <select id="run-tf">
-          <option>1h</option><option selected>4h</option><option>1day</option>
-        </select>
-      </div>
-      <div style="flex:0 0 120px;min-width:120px;">
-        <label for="run-source">Candles</label>
-        <select id="run-source">
-          <option value="live">live (Bitget)</option>
-          <option value="fixture">fixture (offline)</option>
-        </select>
-      </div>
-      <div style="flex:0 0 90px;min-width:90px;">
-        <label for="run-limit">Live limit</label>
-        <input id="run-limit" class="mono" value="200" />
-      </div>
-      <div style="flex:0 0 auto;">
-        <button id="run" class="primary">Run and verify</button>
-      </div>
-    </div>
-    <div id="run-status" class="muted" style="margin-top:12px;">
-      Live fetch needs network. Fixture markets: BTCUSDT, ETHUSDT, SOLUSDT at 4h.
+      <a href="https://github.com/zkasuran/bitget-agentbench/actions/workflows/ci.yml">CI status</a>
+      <a href="https://github.com/zkasuran/bitget-agentbench#readme">Docs &amp; README</a>
     </div>
   </div>
-
-  <div class="card" id="run-result" style="display:none;">
-    <div class="verdict">
-      <span id="run-badge" class="badge run">…</span>
-      <span id="run-agent" class="mono" style="font-size:15px;color:var(--dim);"></span>
-    </div>
-    <div id="run-metrics" class="metrics"></div>
-    <div id="run-checks"></div>
-  </div>
-
-  <hr class="hr" />
-
-  <h2>Verify your own report</h2>
-  <p class="demo-note">
-    Ran <code>agentbench run --out ./report</code> on your own machine? Drop the
-    report folder here (or its files: scorecard.json, equity.csv, trades.jsonl
-    and, for a live run, candles.json). They never leave your browser. The same
-    verifier recomputes the numbers and tells you if they hold.
-  </p>
-  <div class="card">
-    <div class="row">
-      <div>
-        <label for="upload">Report folder or files</label>
-        <input id="upload" type="file" multiple webkitdirectory />
-      </div>
-      <div style="flex:0 0 auto;">
-        <button id="upload-files-btn" class="primary">Verify upload</button>
-      </div>
-    </div>
-    <div class="muted" style="margin-top:8px;">
-      Folder picker not cooperating? <button id="pick-files" style="padding:4px 9px;">pick files instead</button>
-      <input id="upload-files" type="file" multiple style="display:none;" />
-    </div>
-    <div id="upload-status" class="muted" style="margin-top:12px;"></div>
-  </div>
-
-  <div class="card" id="upload-result" style="display:none;">
-    <div class="verdict">
-      <span id="up-badge" class="badge run">…</span>
-      <span id="up-agent" class="mono" style="font-size:15px;color:var(--dim);"></span>
-    </div>
-    <div id="up-metrics" class="metrics"></div>
-    <div id="up-checks"></div>
-  </div>
-
-  <hr class="hr" />
-
-  <h2>See it catch a lie</h2>
-  <p class="demo-note">
-    Edit one number in the scorecard and verify the doctored copy. The file on
-    disk is never touched, this happens in memory. Watch the verdict flip to FAIL
-    and the checks that caught it light up red. A re-stamped content hash would
-    still not save it: ledger and replay recompute from scratch.
-  </p>
-  <div class="card">
-    <div class="row">
-      <div>
-        <label for="field">Field</label>
-        <select id="field">
-          <option value="metrics.totalReturnPct">metrics.totalReturnPct</option>
-          <option value="metrics.maxDrawdownPct">metrics.maxDrawdownPct</option>
-          <option value="metrics.sharpe">metrics.sharpe</option>
-          <option value="metrics.winRatePct">metrics.winRatePct</option>
-        </select>
-      </div>
-      <div>
-        <label for="value">New value</label>
-        <input id="value" class="mono" value="99" />
-      </div>
-      <div style="flex:0 0 auto;">
-        <button id="tamper" class="danger">Doctor and verify</button>
-      </div>
-    </div>
-    <div id="tamper-status" class="muted" style="margin-top:12px;"></div>
-  </div>
-
-  <div class="card" id="tamper-result" style="display:none;">
-    <div class="verdict">
-      <span id="t-badge" class="badge run">…</span>
-      <span id="t-note" class="mono" style="font-size:14px;color:var(--dim);"></span>
-    </div>
-    <div id="t-checks"></div>
-  </div>
-
-  <p class="foot">
-    Runs the real <code>runBacktest</code> and <code>verifyReport</code> from
-    <a href="https://github.com/zkasuran/bitget-agentbench">bitget-agentbench</a>,
-    bundled for the browser. Same engine and same SHA-256 as the CLI (proven
-    byte-identical by a test in the repo), so a result here matches a result
-    there. Live candles come from Bitget's public keyless endpoint. Nothing you
-    run or upload leaves your browser. Built with AI assistance (Claude),
-    disclosed in the repo.
-  </p>
-</div>
+</footer>
 
 <script type="module">
   const $ = (id) => document.getElementById(id);
-  const esc = (v) =>
-    String(v ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  const fmtCheck = (c) => {
-    const diff = (c.diffs || [])
-      .slice(0, 3)
-      .map((d) => `${esc(d.field)}: claimed ${esc(d.claimed)}, recomputed ${esc(d.recomputed)}`)
-      .join("; ");
-    const status = esc(c.status);
-    return `<div class="check">
-      <span class="name">${esc(c.name)}</span>
-      <span class="tag ${status}">${status.toUpperCase()}</span>
-      <span class="detail">${esc(c.detail || "")}${diff ? ` <span class="diff">(${diff})</span>` : ""}</span>
-    </div>`;
-  };
-  const render = (result, badgeEl, checksEl) => {
-    badgeEl.className = "badge " + (result.pass ? "pass" : "fail");
-    badgeEl.textContent = result.pass ? "VERIFIED" : "FAILED";
-    checksEl.innerHTML = result.checks.map(fmtCheck).join("");
-  };
-  const num = (v, digits) => (typeof v === "number" ? v.toFixed(digits) : "—");
-  const signClass = (v) => (typeof v !== "number" ? "" : v > 0 ? "pos" : v < 0 ? "neg" : "");
-  const metricCell = (k, v, cls) =>
-    `<div class="metric"><span class="k">${esc(k)}</span><span class="v ${cls}">${esc(v)}</span></div>`;
-  const renderMetrics = (s, el) => {
+  const esc = (v) => String(v ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#39;");
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
+
+  // ---- scroll reveals ----
+  if ("IntersectionObserver" in window && !reduceMotion) {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  } else {
+    document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+  }
+
+  // ---- shared renderers ----
+  const ICO = { pass: "✓", fail: "✗", skip: "–", pending: "·" };
+  const num = (v, d) => (typeof v === "number" ? v.toFixed(d) : "—");
+  const signCls = (v) => (typeof v !== "number" ? "" : v > 0 ? "pos" : v < 0 ? "neg" : "");
+  const metricCell = (k, v, cls) => `<div class="metric"><span class="k">${esc(k)}</span><span class="v ${cls}">${esc(v)}</span></div>`;
+
+  function renderMetrics(s, el) {
     if (!s) { el.innerHTML = ""; return; }
     const ret = num(s.totalReturnPct, 2);
     el.innerHTML = [
       metricCell(`${s.symbol} ${s.granularity}`, `${s.bars} bars`, ""),
-      metricCell("return %", ret === "—" ? "—" : `${ret}`, signClass(s.totalReturnPct)),
-      metricCell("sharpe", num(s.sharpe, 2), signClass(s.sharpe)),
+      metricCell("return %", ret === "—" ? "—" : ret, signCls(s.totalReturnPct)),
+      metricCell("sharpe", num(s.sharpe, 2), signCls(s.sharpe)),
       metricCell("max drawdown %", num(s.maxDrawdownPct, 2), "neg"),
       metricCell("win rate %", num(s.winRatePct, 1), ""),
       metricCell("trades", String(s.totalTrades ?? "—"), ""),
       metricCell("data", esc(s.source), ""),
     ].join("");
-  };
+  }
 
-  // Everything below needs the bundled verifier. wire() receives the loaded
-  // module so a failed load surfaces as a message instead of a dead page.
+  function diffText(c) {
+    return (c.diffs || []).slice(0, 2)
+      .map((d) => `${esc(d.field)}: claimed ${esc(d.claimed)}, got ${esc(d.recomputed)}`).join("; ");
+  }
+  function checkRow(c, extraClass = "") {
+    const status = esc(c.status);
+    const diff = diffText(c);
+    return `<div class="check ${extraClass}" data-status="${status}">
+      <span class="ico" aria-hidden="true">${ICO[c.status] || ""}</span>
+      <span class="name">${esc(c.name)}</span>
+      <span class="tag">${status.toUpperCase()}</span>
+      <span class="detail">${esc(c.detail || "")}${diff ? ` <span class="diff">(${diff})</span>` : ""}</span>
+    </div>`;
+  }
+  function setBadge(el, result) {
+    el.className = "badge " + (result.pass ? "pass" : "fail");
+    el.innerHTML = `<span class="ico" aria-hidden="true">${result.pass ? "✓" : "✗"}</span> ${result.pass ? "VERIFIED" : "FAILED"}`;
+  }
+  function render(result, badgeEl, checksEl, metricsEl) {
+    setBadge(badgeEl, result);
+    if (metricsEl) renderMetrics(result.summary, metricsEl);
+    checksEl.innerHTML = result.checks.map((c) => checkRow(c)).join("");
+  }
+
   function wire(bundle) {
-    const {
-      listReports, verifyByName, verifyTampered,
-      runStrategy, verifyUploaded, strategyNames,
-    } = bundle;
+    const { listReports, verifyByName, verifyTampered, runStrategy, verifyUploaded, strategyNames } = bundle;
+    $("try-ui").hidden = false;
+    let reportList = [];
 
-  async function init() {
-    try {
-      const reports = await listReports();
-      const sel = $("report");
-      sel.innerHTML = reports
+    // ---------- populate selects ----------
+    async function loadReports() {
+      reportList = await listReports();
+      $("report-count").textContent = String(reportList.length);
+      const opts = reportList
         .map((r) => `<option value="${esc(r.name)}">${esc(r.agent)} · ${esc(r.symbol)} ${esc(r.granularity)}</option>`)
         .join("");
-      $("status").textContent = `${reports.length} committed reports. Pick one and verify.`;
-    } catch (err) {
-      $("status").textContent = "Could not load the report index: " + err;
+      $("v-report").innerHTML = opts;
+      $("t-report").innerHTML = opts;
+      $("v-status").textContent = `${reportList.length} committed reports. Pick one and verify.`;
+      $("t-status").textContent = "";
     }
-    // Populate the "run your own" strategy dropdown from the bundle.
-    try {
-      $("run-strategy").innerHTML = strategyNames()
-        .map((n) => `<option value="${esc(n)}">${esc(n)}</option>`)
-        .join("");
-    } catch (err) {
-      $("run-status").textContent = "Could not load strategies: " + err;
-    }
-  }
+    try { $("r-strategy").innerHTML = strategyNames().map((n) => `<option>${esc(n)}</option>`).join(""); }
+    catch (e) { $("r-status").textContent = "Could not load strategies: " + e; }
 
-  $("verify").addEventListener("click", async () => {
-    const name = $("report").value;
-    $("status").textContent = "Verifying in your browser…";
-    try {
-      const result = await verifyByName(name);
-      $("result").style.display = "block";
-      $("verdict-agent").textContent = result.agent;
-      renderMetrics(result.summary, $("metrics"));
-      render(result, $("verdict-badge"), $("checks"));
-      $("status").textContent = "Done. Recomputed locally, no server call.";
-    } catch (err) {
-      $("status").textContent = "Error: " + err;
+    // ---------- tabs ----------
+    const tabs = [["tab-verify","panel-verify"],["tab-run","panel-run"],["tab-tamper","panel-tamper"],["tab-upload","panel-upload"]];
+    function selectTab(id) {
+      for (const [t, p] of tabs) {
+        const on = t === id;
+        $(t).setAttribute("aria-selected", String(on));
+        $(p).hidden = !on;
+      }
     }
-  });
+    tabs.forEach(([t]) => $(t).addEventListener("click", () => selectTab(t)));
 
-  $("tamper").addEventListener("click", async () => {
-    const name = $("report").value;
-    const field = $("field").value;
-    const raw = $("value").value;
-    const value = raw.trim() === "" || isNaN(Number(raw)) ? raw : Number(raw);
-    $("tamper-status").textContent = "Doctoring in memory and verifying…";
-    try {
-      const { result, original, doctored } = await verifyTampered(name, { field, value });
-      $("tamper-result").style.display = "block";
-      $("t-note").textContent = `${field}: ${original} → ${doctored}`;
-      render(result, $("t-badge"), $("t-checks"));
-      $("tamper-status").textContent = result.pass
-        ? "Unexpected pass. Try a value that actually changes the metric."
-        : "Caught. The recompute does not match the doctored number.";
-    } catch (err) {
-      $("tamper-status").textContent = "Error: " + err;
-    }
-  });
+    // ---------- verify a report ----------
+    $("v-go").addEventListener("click", async () => {
+      $("v-status").textContent = "Verifying in your browser…";
+      try {
+        const result = await verifyByName($("v-report").value);
+        $("v-result").hidden = false;
+        $("v-agent").textContent = result.agent;
+        render(result, $("v-badge"), $("v-checks"), $("v-metrics"));
+        $("v-status").textContent = "Done. Recomputed locally, no server call.";
+      } catch (e) { $("v-status").textContent = "Error: " + e; }
+    });
 
-  $("run").addEventListener("click", async () => {
-    const spec = {
-      strategy: $("run-strategy").value,
-      symbol: $("run-symbol").value.trim().toUpperCase(),
-      granularity: $("run-tf").value,
-      source: $("run-source").value,
-      limit: Math.max(1, Math.min(1000, Number($("run-limit").value) || 200)),
-      seed: 1,
-    };
-    $("run-status").textContent =
-      spec.source === "live"
+    // ---------- run a strategy ----------
+    $("r-go").addEventListener("click", async () => {
+      const spec = {
+        strategy: $("r-strategy").value,
+        symbol: $("r-symbol").value.trim().toUpperCase(),
+        granularity: $("r-tf").value,
+        source: $("r-source").value,
+        limit: Math.max(1, Math.min(1000, Number($("r-limit").value) || 200)),
+        seed: 1,
+      };
+      $("r-status").textContent = spec.source === "live"
         ? `Fetching ${spec.limit} live candles and running ${spec.strategy}…`
         : `Running ${spec.strategy} on the ${spec.symbol} ${spec.granularity} fixture…`;
-    try {
-      const result = await runStrategy(spec);
-      $("run-result").style.display = "block";
-      $("run-agent").textContent = `${result.agent} · ${spec.symbol} ${spec.granularity}`;
-      renderMetrics(result.summary, $("run-metrics"));
-      render(result, $("run-badge"), $("run-checks"));
-      $("run-status").textContent =
-        "Done. Backtested, scored and verified in your browser, no server call.";
-    } catch (err) {
-      // Hide any prior verdict so a failed run never leaves a stale card up.
-      $("run-result").style.display = "none";
-      $("run-status").textContent =
-        spec.source === "live"
-          ? "Live fetch failed (network, CORS or symbol): " + err + ". Switch Candles to fixture for an offline run."
-          : "Error: " + err;
-    }
-  });
-
-  // Read a FileList into { relativePath -> text }, keeping only report files.
-  // Match on exact basename (what verifyUploaded loads), so a stray old-equity.csv
-  // is not accepted by the UI then silently dropped by the verifier.
-  async function readReportFiles(fileList) {
-    const KEEP = new Set(["scorecard.json", "equity.csv", "trades.jsonl", "candles.json"]);
-    const wanted = (name) => {
-      const base = name.split("/").pop();
-      return KEEP.has(base) || base.startsWith("agent.snapshot.");
-    };
-    const out = {};
-    for (const f of fileList) {
-      const name = f.webkitRelativePath || f.name;
-      if (!wanted(name)) continue;
-      out[name] = await f.text();
-    }
-    return out;
-  }
-
-  async function doVerifyUpload(fileList) {
-    if (!fileList || fileList.length === 0) {
-      $("upload-status").textContent = "Pick a report folder or its files first.";
-      return;
-    }
-    $("upload-status").textContent = "Reading files and verifying in your browser…";
-    try {
-      const files = await readReportFiles(fileList);
-      if (!Object.keys(files).some((k) => k.endsWith("scorecard.json"))) {
-        $("upload-status").textContent = "No scorecard.json found in that selection.";
-        return;
+      try {
+        const result = await runStrategy(spec);
+        $("r-result").hidden = false;
+        $("r-agent").textContent = `${result.agent} · ${spec.symbol} ${spec.granularity}`;
+        render(result, $("r-badge"), $("r-checks"), $("r-metrics"));
+        $("r-status").textContent = "Done. Backtested, scored and verified in your browser, no server call.";
+      } catch (e) {
+        $("r-result").hidden = true;
+        $("r-status").textContent = spec.source === "live"
+          ? "Live fetch failed (network, CORS or symbol): " + e + ". Switch Candles to fixture for an offline run."
+          : "Error: " + e;
       }
-      const result = await verifyUploaded(files);
-      $("upload-result").style.display = "block";
-      $("up-agent").textContent = `${result.agent} · ${result.summary.symbol} ${result.summary.granularity}`;
-      renderMetrics(result.summary, $("up-metrics"));
-      render(result, $("up-badge"), $("up-checks"));
-      $("upload-status").textContent = result.pass
-        ? "Verified. The numbers reproduce on your machine."
-        : "Did not verify. See the checks above for what failed.";
-    } catch (err) {
-      $("upload-status").textContent = "Error: " + err;
+    });
+
+    // ---------- doctor a number ----------
+    $("t-go").addEventListener("click", async () => {
+      const field = $("t-field").value;
+      const raw = $("t-value").value;
+      const value = raw.trim() === "" || isNaN(Number(raw)) ? raw : Number(raw);
+      $("t-status").textContent = "Doctoring in memory and verifying…";
+      try {
+        const { result, original, doctored } = await verifyTampered($("t-report").value, { field, value });
+        $("t-result").hidden = false;
+        $("t-note").textContent = `${field}: ${original} → ${doctored}`;
+        setBadge($("t-badge"), result);
+        $("t-checks").innerHTML = result.checks.map((c) => checkRow(c)).join("");
+        $("t-status").textContent = result.pass
+          ? "Unexpected pass. Try a value that actually changes the metric."
+          : "Caught. The recompute does not match the doctored number.";
+      } catch (e) { $("t-status").textContent = "Error: " + e; }
+    });
+
+    // ---------- upload ----------
+    async function readReportFiles(fileList) {
+      const KEEP = new Set(["scorecard.json","equity.csv","trades.jsonl","candles.json"]);
+      const out = {};
+      for (const f of fileList) {
+        const name = f.webkitRelativePath || f.name;
+        const base = name.split("/").pop();
+        if (KEEP.has(base) || base.startsWith("agent.snapshot.")) out[name] = await f.text();
+      }
+      return out;
     }
+    async function doUpload(fileList) {
+      if (!fileList || fileList.length === 0) { $("u-status").textContent = "Pick a report folder or its files first."; return; }
+      $("u-status").textContent = "Reading files and verifying in your browser…";
+      try {
+        const files = await readReportFiles(fileList);
+        if (!Object.keys(files).some((k) => k.endsWith("scorecard.json"))) { $("u-status").textContent = "No scorecard.json found in that selection."; return; }
+        const result = await verifyUploaded(files);
+        $("u-result").hidden = false;
+        $("u-agent").textContent = `${result.agent} · ${result.summary.symbol} ${result.summary.granularity}`;
+        render(result, $("u-badge"), $("u-checks"), $("u-metrics"));
+        $("u-status").textContent = result.pass ? "Verified. The numbers reproduce on your machine." : "Did not verify. See the checks above.";
+      } catch (e) { $("u-status").textContent = "Error: " + e; }
+    }
+    $("u-go").addEventListener("click", () => doUpload($("u-dir").files));
+    $("u-pick").addEventListener("click", () => $("u-files").click());
+    $("u-files").addEventListener("change", (e) => doUpload(e.target.files));
+
+    // ---------- auto demo ----------
+    const PREFERRED = ["sma-crossover-BTCUSDT-4h","momentum-BTCUSDT-4h","macd-crossover-BTCUSDT-4h"];
+    function demoReportName() {
+      for (const p of PREFERRED) if (reportList.some((r) => r.name === p)) return p;
+      return reportList[0] && reportList[0].name;
+    }
+    function pendingRows(names) {
+      $("demo-checks").innerHTML = names
+        .map((n) => checkRow({ name: n, status: "pending", detail: "" }, "reveal-row")).join("");
+    }
+    async function revealChecks(checks) {
+      pendingRows(checks.map((c) => c.name));
+      const rows = $("demo-checks").querySelectorAll(".check");
+      await sleep(250);
+      for (let i = 0; i < checks.length; i++) {
+        const c = checks[i];
+        const row = rows[i];
+        row.setAttribute("data-status", c.status);
+        row.querySelector(".ico").textContent = ICO[c.status] || "";
+        row.querySelector(".tag").textContent = c.status.toUpperCase();
+        const diff = diffText(c);
+        row.querySelector(".detail").innerHTML = `${esc(c.detail || "")}${diff ? ` <span class="diff">(${diff})</span>` : ""}`;
+        row.classList.add("shown");
+        await sleep(420);
+      }
+    }
+    let demoBusy = false;
+    async function runDemo() {
+      if (demoBusy) return;
+      const name = demoReportName();
+      if (!name) return;
+      demoBusy = true;
+      $("demo-replay").disabled = true;
+      try {
+        // Step 1: an honest scorecard verifies.
+        $("demo-step").textContent = "step 1 / 2";
+        $("demo-caption").innerHTML = "A committed scorecard, recomputed from its trades…";
+        $("demo-badge").className = "badge run"; $("demo-badge").textContent = "verifying…";
+        $("demo-agent").textContent = name;
+        const ok = await verifyByName(name);
+        renderMetrics(ok.summary, $("demo-metrics"));
+        await revealChecks(ok.checks);
+        setBadge($("demo-badge"), ok);
+        $("demo-caption").innerHTML = "<b>Verified.</b> Every number recomputed from the ledger and matched.";
+        await sleep(1500);
+
+        // Step 2: doctor one number, watch it get caught.
+        $("demo-step").textContent = "step 2 / 2";
+        $("demo-caption").innerHTML = "Now doctor the return to <b>+99%</b> and verify the forged copy…";
+        $("demo-badge").className = "badge run"; $("demo-badge").textContent = "verifying…";
+        await sleep(700);
+        const bad = await verifyTampered(name, { field: "metrics.totalReturnPct", value: 99 });
+        await revealChecks(bad.result.checks);
+        setBadge($("demo-badge"), bad.result);
+        $("demo-caption").innerHTML = `<span class="neg">Caught.</span> ledger and replay recompute from scratch, so the lie can't survive, even with a re-stamped hash. <span class="mono" style="color:var(--dim);">(${esc(bad.original)} → ${esc(bad.doctored)})</span>`;
+        $("demo-step").textContent = "done";
+      } catch (e) {
+        $("demo-caption").textContent = "Demo error: " + e + ". Try the verifier below.";
+      } finally {
+        demoBusy = false;
+        $("demo-replay").disabled = false;
+      }
+    }
+    $("demo-replay").addEventListener("click", runDemo);
+
+    // auto-play once on scroll-into-view
+    let demoPlayed = false;
+    if ("IntersectionObserver" in window) {
+      const dio = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !demoPlayed) { demoPlayed = true; runDemo(); dio.unobserve(e.target); }
+        }
+      }, { threshold: 0.4 });
+      dio.observe($("demo-card"));
+    } else {
+      $("demo-caption").textContent = "Press play to run the live verify-then-tamper demo.";
+    }
+
+    loadReports();
   }
 
-  $("upload-files-btn").addEventListener("click", () => doVerifyUpload($("upload").files));
-  $("pick-files").addEventListener("click", () => $("upload-files").click());
-  $("upload-files").addEventListener("change", (e) => doVerifyUpload(e.target.files));
-
-    init();
-  }
-
-  // Bootstrap. We are inside a module, so ES modules and JS work. fetch is the
-  // one Web API the verifier cannot do without (it loads the static reports,
-  // fixtures and, for a live run, candles). If it or the bundle is missing,
-  // reveal the CLI fallback instead of leaving a frozen page.
+  // ---- bootstrap ----
   if (typeof fetch !== "function") {
-    $("compat-note").textContent =
-      "This browser has no fetch(), so the demo cannot load data. Use the CLI below instead.";
+    $("compat-note").textContent = "This browser has no fetch(), so the demo cannot load data. Use the CLI below instead.";
     $("compat").hidden = false;
   } else {
     import("./verify.bundle.js").then(wire).catch((err) => {
-      $("compat-note").textContent =
-        "Could not load the verifier bundle (" + err + "). Reload, or use the CLI below.";
+      $("compat-note").textContent = "Could not load the verifier bundle (" + err + "). Reload, or use the CLI below.";
       $("compat").hidden = false;
     });
   }
