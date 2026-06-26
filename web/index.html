@@ -186,7 +186,10 @@
   .demo-head .lights { display: flex; gap: 6px; }
   .demo-head .lights i { width: 11px; height: 11px; border-radius: 50%; background: var(--line-2); display: inline-block; }
   .demo-head .title { font-family: var(--mono); font-size: 13px; color: var(--dim); }
-  .demo-head .step { margin-left: auto; font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
+  .demo-head .live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .05em; color: var(--aqua); text-transform: uppercase; }
+  .demo-head .live i { width: 7px; height: 7px; border-radius: 50%; background: var(--aqua); box-shadow: 0 0 7px var(--aqua); animation: livepulse 1.6s ease-in-out infinite; }
+  @keyframes livepulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .3; transform: scale(.82); } }
+  .demo-head .step { margin-left: 14px; font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
   .demo-body { padding: 22px 18px 8px; }
   .demo-caption { min-height: 24px; font-size: 15px; color: var(--ink-2); margin: 0 0 16px; }
   .demo-caption b { color: var(--ink); }
@@ -294,6 +297,7 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .reveal, .reveal-row { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .demo-head .live i { animation: none; }
   }
 
   /* fallback cards */
@@ -380,8 +384,9 @@
       <h2 class="h2 reveal" id="demo-h">A real scorecard verifies. Then we doctor one number.</h2>
       <p class="sec-lede reveal">
         Everything below runs the real verifier on a committed report, in this
-        browser, no server in the loop. It plays on its own when it scrolls into
-        view. The file on disk is never touched, the tamper happens in memory.
+        browser, no server in the loop. It loops on its own when it scrolls into
+        view, so there is nothing to press and no video to trust. The file on
+        disk is never touched, the tamper happens in memory.
       </p>
 
       <div class="demo-wrap reveal">
@@ -389,20 +394,33 @@
           <div class="demo-head">
             <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="title mono">agentbench verify</span>
-            <span class="step mono" id="demo-step">ready</span>
+            <span class="live" aria-hidden="true"><i></i>live</span>
+            <span class="step mono" id="demo-step">verified</span>
           </div>
           <div class="demo-body">
-            <p class="demo-caption" id="demo-caption" aria-live="polite">Scroll here to start, or press play.</p>
+            <p class="demo-caption" id="demo-caption" aria-live="polite">A committed scorecard for sma-crossover, recomputed from its own trade ledger. Every number matched.</p>
             <div class="verdict">
-              <span class="badge run" id="demo-badge" aria-live="polite">idle</span>
-              <span class="agent mono" id="demo-agent"></span>
+              <span class="badge pass" id="demo-badge" aria-live="polite"><span class="ico" aria-hidden="true">✓</span> VERIFIED</span>
+              <span class="agent mono" id="demo-agent">sma-crossover</span>
             </div>
-            <div class="metrics" id="demo-metrics"></div>
-            <div class="checks" id="demo-checks"></div>
+            <div class="metrics" id="demo-metrics">
+              <div class="metric"><span class="k">BTCUSDT 4h</span><span class="v ">930 bars</span></div>
+              <div class="metric"><span class="k">return %</span><span class="v neg">-2.14</span></div>
+              <div class="metric"><span class="k">sharpe</span><span class="v neg">-2.46</span></div>
+              <div class="metric"><span class="k">max drawdown %</span><span class="v neg">2.70</span></div>
+              <div class="metric"><span class="k">win rate %</span><span class="v ">27.8</span></div>
+              <div class="metric"><span class="k">trades</span><span class="v ">18</span></div>
+              <div class="metric"><span class="k">data</span><span class="v ">fixture</span></div>
+            </div>
+            <div class="checks" id="demo-checks">
+              <div class="check" data-status="pass"><span class="ico" aria-hidden="true">✓</span><span class="name">integrity</span><span class="tag">PASS</span><span class="detail">content hash matches (c06cf08a59c633ab…)</span></div>
+              <div class="check" data-status="pass"><span class="ico" aria-hidden="true">✓</span><span class="name">dataset</span><span class="tag">PASS</span><span class="detail">930 fixture candles re-hash to the claimed dataset SHA256 (3476016e55d868ed…)</span></div>
+              <div class="check" data-status="pass"><span class="ico" aria-hidden="true">✓</span><span class="name">ledger</span><span class="tag">PASS</span><span class="detail">all 12 headline metrics recompute from 36 fills + the equity curve</span></div>
+              <div class="check" data-status="pass"><span class="ico" aria-hidden="true">✓</span><span class="name">replay</span><span class="tag">PASS</span><span class="detail">re-running sma-crossover (built-in) from the manifest reproduces every metric</span></div>
+            </div>
           </div>
           <div class="demo-foot">
-            <button class="btn btn-primary" id="demo-replay" type="button" style="padding:9px 15px;font-size:14px;">&#9654; Play again</button>
-            <span class="note">integrity, dataset, ledger and replay each recompute from scratch. Re-stamping the hash can't save a doctored number.</span>
+            <span class="note">integrity, dataset, ledger and replay each recompute from scratch. Re-stamping the hash can't save a doctored number. This runs on a loop on its own.</span>
           </div>
         </div>
       </div>
@@ -793,11 +811,55 @@ npx agentbench verify ./report</pre>
     $("u-files").addEventListener("change", (e) => doUpload(e.target.files));
 
     // ---------- auto demo ----------
-    const PREFERRED = ["sma-crossover-BTCUSDT-4h","momentum-BTCUSDT-4h","macd-crossover-BTCUSDT-4h"];
-    function demoReportName() {
-      for (const p of PREFERRED) if (reportList.some((r) => r.name === p)) return p;
-      return reportList[0] && reportList[0].name;
+    // Pool of committed reports the loop rotates through: the strategy x symbol
+    // grid, intersected with what is actually present. The grid skips the thin
+    // zero-trade reports without having to read their metrics here.
+    const DEMO_STRATS = ["sma-crossover","rsi-meanrev","macd-crossover","vwap-reversion","momentum","donchian-breakout","bollinger-meanrev","atr-channel"];
+    const DEMO_SYMS = ["BTCUSDT","ETHUSDT","SOLUSDT"];
+    const DEMO_WANTED = new Set();
+    for (const s of DEMO_STRATS) for (const y of DEMO_SYMS) DEMO_WANTED.add(`${s}-${y}-4h`);
+    function demoPool() {
+      const pool = reportList.filter((r) => DEMO_WANTED.has(r.name)).map((r) => r.name);
+      return pool.length ? pool : reportList.map((r) => r.name);
     }
+
+    // Each pass doctors a different metric to a freshly randomised value, always
+    // well outside any real one, so the tamper is genuinely caught every time.
+    const rInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+    const rNum = (lo, hi, d) => Number((lo + Math.random() * (hi - lo)).toFixed(d));
+    const TAMPER_KINDS = [
+      () => { const v = rNum(45, 900, 1);    return { field: "metrics.totalReturnPct", value: v, phrase: `doctor the return to <b>+${v}%</b>` }; },
+      () => { const v = rNum(1.6, 6, 2);     return { field: "metrics.sharpe", value: v, phrase: `inflate the Sharpe to <b>${v}</b>` }; },
+      () => { const v = rNum(85, 99.9, 1);   return { field: "metrics.winRatePct", value: v, phrase: `claim a <b>${v}%</b> win rate` }; },
+      () => { const v = rNum(0.05, 0.45, 2); return { field: "metrics.maxDrawdownPct", value: v, phrase: `shrink the max drawdown to <b>${v}%</b>` }; },
+      () => { const lo = Math.random() < 0.5; const v = lo ? rInt(1, 6) : rInt(200, 999); return { field: "metrics.totalTrades", value: v, phrase: `${lo ? "fake the trade count down to" : "pad the trade count to"} <b>${v}</b>` }; },
+    ];
+
+    let demoFirst = true, lastReport = "", lastKind = -1;
+    function pickIdx(n, prev) {
+      if (n <= 1) return 0;
+      let i = Math.floor(Math.random() * n);
+      if (i === prev) i = (i + 1) % n;   // no immediate repeat
+      return i;
+    }
+    function chooseScenario() {
+      const pool = demoPool();
+      if (!pool.length) return null;
+      let name, tamper;
+      if (demoFirst) {
+        // First pass matches the static resting card: sma-crossover, return -> +99%.
+        name = pool.includes("sma-crossover-BTCUSDT-4h") ? "sma-crossover-BTCUSDT-4h" : pool[0];
+        tamper = { field: "metrics.totalReturnPct", value: 99, phrase: "doctor the return to <b>+99%</b>" };
+        demoFirst = false;
+      } else {
+        name = pool[pickIdx(pool.length, pool.indexOf(lastReport))];
+        lastKind = pickIdx(TAMPER_KINDS.length, lastKind);
+        tamper = TAMPER_KINDS[lastKind]();
+      }
+      lastReport = name;
+      return { name, tamper };
+    }
+
     function pendingRows(names) {
       $("demo-checks").innerHTML = names
         .map((n) => checkRow({ name: n, status: "pending", detail: "" }, "reveal-row")).join("");
@@ -805,7 +867,7 @@ npx agentbench verify ./report</pre>
     async function revealChecks(checks) {
       pendingRows(checks.map((c) => c.name));
       const rows = $("demo-checks").querySelectorAll(".check");
-      await sleep(250);
+      await sleep(450);
       for (let i = 0; i < checks.length; i++) {
         const c = checks[i];
         const row = rows[i];
@@ -815,59 +877,105 @@ npx agentbench verify ./report</pre>
         const diff = diffText(c);
         row.querySelector(".detail").innerHTML = `${esc(c.detail || "")}${diff ? ` <span class="diff">(${diff})</span>` : ""}`;
         row.classList.add("shown");
-        await sleep(420);
+        await sleep(720);   // one check at a time, slow enough to read
       }
     }
     let demoBusy = false;
+    let demoLooping = false;
+    let demoInView = false;
+    let lastOk = null;       // most recent honest verify result
+    let lastOkName = "";
+
+    // Resting state: the honest scorecard, fully verified. Never an empty card.
+    // The static markup paints this before the bundle loads; once a run has
+    // happened it settles back onto the live recomputed result between loops.
+    function showVerified() {
+      $("demo-step").textContent = "verified";
+      if (lastOk) {
+        $("demo-agent").textContent = lastOkName;
+        renderMetrics(lastOk.summary, $("demo-metrics"));
+        $("demo-checks").innerHTML = lastOk.checks.map((c) => checkRow(c)).join("");
+        setBadge($("demo-badge"), lastOk);
+      }
+      $("demo-caption").innerHTML = "A committed scorecard, recomputed from its own trade ledger. Every number matched.";
+    }
+
+    // One full verify-then-tamper pass over the resting scorecard.
     async function runDemo() {
       if (demoBusy) return;
-      const name = demoReportName();
-      if (!name) return;
+      const scenario = chooseScenario();
+      if (!scenario) return;
+      const { name, tamper } = scenario;
       demoBusy = true;
-      $("demo-replay").disabled = true;
       try {
-        // Step 1: an honest scorecard verifies.
+        // Step 1: recompute the honest scorecard from its own ledger.
         $("demo-step").textContent = "step 1 / 2";
-        $("demo-caption").innerHTML = "A committed scorecard, recomputed from its trades…";
+        $("demo-caption").innerHTML = "Recomputing every metric from the committed trade ledger…";
         $("demo-badge").className = "badge run"; $("demo-badge").textContent = "verifying…";
         $("demo-agent").textContent = name;
         const ok = await verifyByName(name);
+        lastOk = ok; lastOkName = name;
         renderMetrics(ok.summary, $("demo-metrics"));
         await revealChecks(ok.checks);
         setBadge($("demo-badge"), ok);
         $("demo-caption").innerHTML = "<b>Verified.</b> Every number recomputed from the ledger and matched.";
-        await sleep(1500);
+        await sleep(2600);   // let the green verdict land
 
         // Step 2: doctor one number, watch it get caught.
         $("demo-step").textContent = "step 2 / 2";
-        $("demo-caption").innerHTML = "Now doctor the return to <b>+99%</b> and verify the forged copy…";
+        $("demo-caption").innerHTML = `Now ${tamper.phrase} and verify the forged copy…`;
         $("demo-badge").className = "badge run"; $("demo-badge").textContent = "verifying…";
-        await sleep(700);
-        const bad = await verifyTampered(name, { field: "metrics.totalReturnPct", value: 99 });
+        await sleep(1700);   // read the claim before it is checked
+        const bad = await verifyTampered(name, { field: tamper.field, value: tamper.value });
         await revealChecks(bad.result.checks);
         setBadge($("demo-badge"), bad.result);
-        $("demo-caption").innerHTML = `<span class="neg">Caught.</span> ledger and replay recompute from scratch, so the lie can't survive, even with a re-stamped hash. <span class="mono" style="color:var(--dim);">(${esc(bad.original)} → ${esc(bad.doctored)})</span>`;
-        $("demo-step").textContent = "done";
+        if (bad.result.pass) {
+          $("demo-caption").innerHTML = "<b>Verified.</b> That edit did not move the numbers, so there was nothing to catch.";
+          $("demo-step").textContent = "verified";
+        } else {
+          $("demo-caption").innerHTML = `<span class="neg">Caught.</span> ledger and replay recompute from scratch, so the lie can't survive, even with a re-stamped hash. <span class="mono" style="color:var(--dim);">(${esc(bad.original)} → ${esc(bad.doctored)})</span>`;
+          $("demo-step").textContent = "caught";
+        }
       } catch (e) {
         $("demo-caption").textContent = "Demo error: " + e + ". Try the verifier below.";
       } finally {
         demoBusy = false;
-        $("demo-replay").disabled = false;
       }
     }
-    $("demo-replay").addEventListener("click", runDemo);
 
-    // auto-play once on scroll-into-view
-    let demoPlayed = false;
+    // Infinite loop: play, hold the caught verdict so it can be read, settle
+    // back onto the verified card, play again. Runs only while the card is
+    // on-screen and the tab is in the foreground, so it never burns CPU in a
+    // background tab. Reduced-motion visitors keep the static verified card.
+    const loopAlive = () => demoInView && !document.hidden;
+    async function demoLoop() {
+      if (demoLooping || reduceMotion) return;
+      demoLooping = true;
+      try {
+        while (loopAlive()) {
+          await runDemo();
+          if (!loopAlive()) break;
+          await sleep(4800);   // hold the red verdict so the catch sinks in
+          if (!loopAlive()) break;
+          showVerified();      // settle back onto the honest scorecard
+          await sleep(2000);   // rest on the verified card before the next pass
+        }
+      } finally {
+        demoLooping = false;
+      }
+    }
+
+    // Auto-play on scroll-into-view and keep looping while it stays in view.
     if ("IntersectionObserver" in window) {
       const dio = new IntersectionObserver((entries) => {
         for (const e of entries) {
-          if (e.isIntersecting && !demoPlayed) { demoPlayed = true; runDemo(); dio.unobserve(e.target); }
+          demoInView = e.isIntersecting;
+          if (e.isIntersecting && !reduceMotion) demoLoop();
         }
-      }, { threshold: 0.4 });
+      }, { threshold: 0.35 });
       dio.observe($("demo-card"));
-    } else {
-      $("demo-caption").textContent = "Press play to run the live verify-then-tamper demo.";
+      // Pick the loop back up when the tab returns to the foreground.
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) demoLoop(); });
     }
 
     loadReports();
