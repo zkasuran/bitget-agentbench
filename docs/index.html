@@ -380,7 +380,13 @@
     .tabs { gap: 5px; }
     .tab { flex: 1 1 auto; text-align: center; padding: 10px 12px; }
 
-    pre.code, .fallback pre { font-size: 12px; padding: 12px 13px; }
+    /* wrap code instead of scrolling it sideways: on a phone the page
+       should only ever move up and down, never a box scrolling across */
+    pre.code, .fallback pre {
+      font-size: 12px; padding: 12px 13px;
+      white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+      overflow-x: hidden;
+    }
 
     footer { padding: 40px 0; }
     footer .wrap { gap: 22px; }
